@@ -13,6 +13,10 @@ app.get('/', (req, res) => {
     res.send("hello world");
 })
 
+app.get('/', (req, res) => {
+    res.send("this bramch for test pull request")
+})
+
 app.listen(PORT, () => {
     console.log('app runnig on port :', PORT)
 })
