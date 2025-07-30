@@ -1,23 +1,25 @@
+// src/Login.js (หรือ LoginForm.tsx)
 "use client"
 
 import React, { useEffect, useState } from 'react'
 import "@/app/login.css"
+import { ArrowLeft } from 'lucide-react'; // <<< Import ArrowLeft เข้ามา
+
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(''); // ใช้สำหรับข้อความใน popup
-  const [showErrorPopup, setShowErrorPopup] = useState(false); // State สำหรับควบคุมการแสดง popup
+  const [errorMessage, setErrorMessage] = useState('');
+  const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Effect สำหรับซ่อน popup อัตโนมัติ
   useEffect(() => {
     if (showErrorPopup) {
       const timer = setTimeout(() => {
         setShowErrorPopup(false);
-        setErrorMessage(''); // ล้างข้อความ error ด้วย
-      }, 3000); // Popup จะหายไปใน 3 วินาที
-      return () => clearTimeout(timer); // Cleanup timer เมื่อ component unmount หรือ showErrorPopup เปลี่ยน
+        setErrorMessage('');
+      }, 3000);
+      return () => clearTimeout(timer);
     }
   }, [showErrorPopup]);
 
@@ -25,22 +27,17 @@ const LoginForm = () => {
     event.preventDefault();
 
     if (email === '' || password === '') {
-      // ตรวจสอบว่ามีข้อมูลกรอกครบหรือไม่
       setErrorMessage('Please enter both email and password.');
-      setShowErrorPopup(true); // แสดง popup
-      return; // หยุดการทำงานถ้าข้อมูลไม่ครบ
+      setShowErrorPopup(true);
+      return;
     }
 
     if (email === 'test@example.com' && password === 'password') {
-      // ถ้า Login สำเร็จ
       setErrorMessage('Login Successful!');
       setShowErrorPopup(true);
-      // alert('Login Successful!'); // ไม่ใช้ alert แล้ว
-      // อาจจะ redirect หรือทำอย่างอื่นต่อไป
     } else {
-      // ถ้า Login ไม่สำเร็จ
       setErrorMessage('Invalid email or password.');
-      setShowErrorPopup(true); // แสดง popup
+      setShowErrorPopup(true);
     }
   };
 
@@ -48,27 +45,36 @@ const LoginForm = () => {
     setImageLoaded(true);
   };
 
+  const handleGoBack = () => {
+      alert('Go back functionality will be implemented here!');
+      // ตัวอย่าง: ถ้าใช้ Next.js router.back();
+      // หรือ window.history.back();
+  };
+
   return (
     <div className="full-screen-container">
-      {/* Popup Error/Success Message */}
+      {/* ตำแหน่งของลูกศร (ย้ายมาไว้ตรงนี้) */}
+      <button onClick={handleGoBack} className="back-arrow-button">
+          <ArrowLeft size={28} color="#555" /> {/* เพิ่มขนาดให้มองเห็นง่ายขึ้น */}
+      </button>
+
       {showErrorPopup && (
         <div className={`popup-message ${errorMessage.includes('Successful') ? 'success' : 'error'}`}>
           {errorMessage}
         </div>
       )}
 
-      {/* ส่วนสำหรับรูปภาพด้านซ้าย */}
       <div className={`left-image-container ${imageLoaded ? 'loaded' : ''}`}>
         <img
-          src="/images/restaurant.jpg" // เปลี่ยนเป็น path ที่ถูกต้องของรูปภาพคุณ
+          src="/images/restaurant.jpg"
           alt="Restaurant"
           className="restaurant-image"
           onLoad={handleImageLoad}
         />
       </div>
 
-      {/* ส่วน Login Panel ทางขวา */}
       <div className="login-panel-right">
+        {/* ไม่มีลูกศรอยู่ตรงนี้แล้ว */}
         <h1 className="welcome-title">Welcome</h1>
         <h2 className="design-school-text">to Your Account</h2>
 
@@ -129,7 +135,7 @@ const LoginForm = () => {
         </p>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default LoginForm
+export default LoginForm;
