@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16.3-alpine 
+    container_name: db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: review_restaurant
+    ports:
+      - "5432:5432" 
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # เก็บข้อมูล DB แบบถาวร
+    networks:
+      - app_network 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d review_restaurant"] # ตรวจสอบว่า DB พร้อมรับ Connection
+      interval: 5s # ตรวจสอบทุก 5 วินาที
+      timeout: 5s # Timeout 5 วินาที
+      retries: 5 # ลอง 5 ครั้งก่อนประกาศว่าไม่ healthy
+      start_period: 10s # รอ 10 วินาทีแรกก่อนเริ่ม Health Check
+
+  pgadmin:
+    image: dpage/pgadmin4:8.8 
+    container_name: pgadmin_app
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@example.com # Email สำหรับ Login เข้า PgAdmin (เปลี่ยนได้)
+      PGADMIN_DEFAULT_PASSWORD: 12345678 # Password สำหรับ Login เข้า PgAdmin (เปลี่ยนได้)
+      PGADMIN_LISTEN_PORT: 80 # Port ที่ PgAdmin รันภายใน Container
+    ports:
+      - "8080:80" # Map Port 8080 บน Host ไปยัง Port 80 ของ PgAdmin Container
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin # เก็บ Configuration ของ PgAdmin แบบถาวร
+      # Mount ไฟล์ servers.json เพื่อ Pre-configure การเชื่อมต่อ DB
+      - ./pgadmin/servers.json:/pgadmin4/servers.json # <-- สำคัญ!
+    networks:
+      - app_network 
+    depends_on:
+      - db # PgAdmin จะเริ่มหลังจาก DB พร้อม
+
+networks:
+  app_network: # กำหนดชื่อ Network
+    driver: bridge
+
+volumes:
+  postgres_data: # Volume สำหรับข้อมูล PostgreSQL
+  pgadmin_data:  # Volume สำหรับ Configuration ของ PgAdmin
