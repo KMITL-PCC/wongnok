@@ -45,12 +45,12 @@ app.use(session({
     //store: sessionStore, // ใช้ Redis เป็น storage
     resave: false, // ไม่บันทึก session ซ้ำถ้าไม่มีการเปลี่ยนแปลง
     saveUninitialized: false, // ไม่สร้าง session ใหม่ถ้าไม่มีการเปลี่ยนแปลง
-    // cookie: {
-    //     maxAge: 24 * 60 * 60 * 1000, // 24 ชั่วโมง (ใน milliseconds)
-    //     httpOnly: true, // ป้องกัน JavaScript client-side เข้าถึง cookie
-    //     secure: process.env.NODE_ENV === 'production', // ส่ง cookie ผ่าน HTTPS เท่านั้นใน Production
-    //     sameSite: 'lax' // แนะนำสำหรับ CORS, 'none' ถ้าต้องการเปิดกว้างกว่า (ต้องใช้ secure: true)
-    // }
+    cookie: {
+        maxAge: 24 * 60 * 60 * 1000, // 24 ชั่วโมง (ใน milliseconds)
+        httpOnly: true, // ป้องกัน JavaScript client-side เข้าถึง cookie
+        secure: process.env.NODE_ENV === 'production', // ส่ง cookie ผ่าน HTTPS เท่านั้นใน Production
+        sameSite: 'lax' // แนะนำสำหรับ CORS, 'none' ถ้าต้องการเปิดกว้างกว่า (ต้องใช้ secure: true)
+    }
 }));
 
 

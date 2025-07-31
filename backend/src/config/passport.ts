@@ -119,7 +119,7 @@ passport.use(new GoogleStrategy(
 ));
 
 passport.serializeUser((user: any, done) => {
-    console.log('serializeUser: User ID:', user.id);
+    console.log('serializeUser User ID to session:', user.id);
     done(null, user.id);
 });
 
@@ -129,11 +129,9 @@ passport.deserializeUser(async (id: string, done) => {
     try {
         const user = await prisma.user.findUnique({ where: { id } });
         if (user) {
-            console.log('deserializeUser: User found for ID:', id);
             // ต้อง Cast เป็น Express.User เพราะ Passport คาดหวัง Type นี้
             done(null, user as Express.User);
         } else {
-            console.log('deserializeUser: User found for ID:', id);
             done(null, false); // ไม่พบผู้ใช้
         }
     } catch (err) {
