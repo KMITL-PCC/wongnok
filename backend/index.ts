@@ -56,63 +56,7 @@ app.use(session({
 
 app.use(passport.initialize());
 app.use(passport.session()); 
-// app.use(session({
-//     secret: process.env.SESSION_SECRET || 'secret',
-//     resave: false,
-//     saveUninitialized: false
-// }))
 
-// //passport
-// app.use(passport.initialize())
-// app.use(passport.session())
-
-
-// //google strategy
-// passport.use(new GoogleStrategy({
-//     clientID: process.env.GOOGLE_CLIENT_ID || '',
-//     clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-//     callbackURL: process.env.GOOGLE_CALLBACK_URL || '',
-// }, (accessToken, refreshToken, profile, done) => {
-//     return done(null, profile)
-// }
-// ))
-
-// app.get('/auth/google',
-//     passport.authenticate('google', { scope: ['profile', 'email']})
-// )
-
-// app.get('/auth/google/callback',
-//     passport.authenticate('google', {failureRedirect: '/'}),
-//     (req, res) => res.redirect('/profile')
-// )
-
-
-// app.get('/profile', (req, res) => {
-//     if (req.isAuthenticated()) {
-//         res.send(`hello ${(req.user as any).displayName}`)
-//     } else {
-//         res.redirect('/');
-//     }
-// })
-
-// passport.serializeUser((user: any, done) => {
-//     console.log('Serialize User in session:', user)
-//     done(null, user)
-// })
-
-
-// passport.deserializeUser((user: any, done) => {
-//     console.log('Deserialize User from session', user)
-//     done(null, user)
-// })
-
-// app.get('/logout', (req, res) => {
-//     req.logOut(() => res.redirect('/'))
-// })
-
-// app.get('/hi', (req, res) => {
-//     res.redirect('/')
-// })
 app.use('/auth', authen)
 app.get('/', (req, res) => {
     res.send("hello world");

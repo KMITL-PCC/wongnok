@@ -13,15 +13,21 @@ import { Strategy as LocalStrategy } from 'passport-local'; // สำหรั�
 passport.use(new LocalStrategy(
     {
         usernameField: 'username', 
-        passwordField: 'password'
+        passwordField: 'password',
     },
     async (username : string, password: string, done: any) => {
         try {
             console.log(`Username : ${username} and passowrd: ${password}`)
-            const user = await prisma.user.findUnique({
-                where: { username } // หรือ { email: username } ถ้า usernameField เป็น 'email'
-            });
 
+            // const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginform);
+            // const user = await prisma.user.findUnique({
+            //     where: isEmail ? { email: loginform } : { username: loginform }
+            // });
+            const user = await prisma.user.findUnique({
+                where: {
+                    username
+                }
+            })
             if (!user) {
                 return done(null, false, { message: 'Incorrect username or password.' });
             }
