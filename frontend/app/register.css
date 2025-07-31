@@ -1,4 +1,4 @@
-/* src/app/login.css */
+/* src/app/register.css */
 
 /* --- รีเซ็ตค่าเริ่มต้นและสไตล์พื้นฐานทั่วโลก --- */
 html, body, #root {
@@ -25,32 +25,53 @@ body {
   align-items: center;   
   max-width: 100vw; 
   max-height: 100vh; 
-  background-color: transparent; /* เปลี่ยนเป็น transparent เพื่อให้เห็นพื้นหลัง body */
-  position: relative; /* ยังคง relative สำหรับ popup หรือ Element อื่นๆ */
+  background-color: transparent; 
+  position: relative; 
 }
 
-/* --- ปุ่มลูกศรย้อนกลับ (จัดที่มุมซ้ายบนของหน้าจอ) --- */
+/* --- ปุ่มลูกศรย้อนกลับ (ซ้ายบน) --- */
 .back-arrow-button {
-    position: fixed; /* <<< สำคัญ: ใช้ fixed เพื่อให้อยู่มุมจอเสมอแม้เลื่อนหน้าจอ */
-    top: 20px; /* ระยะห่างจากด้านบนของ viewport */
-    left: 20px; /* ระยะห่างจากด้านซ้ายของ viewport */
+    position: fixed; 
+    top: 20px; 
+    left: 20px; 
     background: none; 
     border: none; 
     cursor: pointer; 
-    padding: 10px; /* เพิ่ม padding เพื่อให้คลิกง่ายขึ้นและดูดีขึ้น */
+    padding: 10px; 
     display: flex; 
     align-items: center;
     justify-content: center;
-    z-index: 1000; /* ให้ปุ่มอยู่ด้านบนสุดของทุกอย่าง */
+    z-index: 1000; 
     color: #555; 
     transition: color 0.2s ease, transform 0.2s ease;
 }
 
 .back-arrow-button:hover {
     color: #55c83e; 
-    transform: translateX(-3px); /* เพิ่ม animation เล็กน้อยเมื่อ hover */
+    transform: translateX(-3px); 
 }
 
+/* --- ปุ่ม Home (ขวาบน) --- */
+.home-icon-button { 
+    position: fixed; 
+    top: 20px; 
+    right: 20px; 
+    background: none; 
+    border: none; 
+    cursor: pointer; 
+    padding: 10px; 
+    display: flex; 
+    align-items: center;
+    justify-content: center;
+    z-index: 1000; 
+    color: #555; 
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.home-icon-button:hover {
+    color: #55c83e; 
+    transform: translateX(3px); 
+}
 
 /* --- คอนเทนเนอร์รูปภาพด้านซ้าย --- */
 .left-image-container {
@@ -73,11 +94,11 @@ body {
   margin-bottom: 0;
 }
 
-/* --- แผง Login ด้านขวา (ไม่มี Box แล้ว) --- */
-.login-panel-right {
+/* --- Register Panel on the Right --- */
+.register-panel-right { 
   display: flex;
   flex-direction: column;
-  position: relative; /* ยังคง relative อยู่สำหรับเนื้อหาภายในอื่นๆ */
+  position: relative; 
   justify-content: center;
   align-items: center;
   background-color: transparent;
@@ -89,21 +110,21 @@ body {
   box-shadow: none;
   margin-right: 0;
   margin-bottom: 0;
-  overflow-y: auto;
+  overflow-y: auto; 
 }
 
 /* --- หัวข้อต้อนรับ --- */
 .welcome-title {
-  font-size: 2.8em;
+  font-size: 2.4em; 
   color: #333;
   margin-bottom: 5px;
   font-weight: bold;
 }
 
 .design-school-text {
-  font-size: 1.6em;
+  font-size: 1.3em; 
   color: #55c83e;
-  margin-bottom: 40px;
+  margin-bottom: 30px; 
   font-weight: bold;
 }
 
@@ -114,13 +135,14 @@ body {
   justify-content: center;
   width: 100%;
   max-width: 350px;
-  padding: 12px 20px;
-  margin-bottom: 15px;
+  padding: 10px 18px; 
+  margin-top: 20px; 
+  margin-bottom: 0; 
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   background-color: #f8f8f8;
   color: #555;
-  font-size: 1em;
+  font-size: 0.95em; 
   cursor: pointer;
   transition: background-color 0.3s ease, border-color 0.3s ease;
 }
@@ -131,7 +153,7 @@ body {
 }
 
 .social-icon {
-  margin-right: 10px;
+  margin-right: 8px; 
 }
 
 /* --- ส่วนแบ่ง "OR" --- */
@@ -140,8 +162,9 @@ body {
   align-items: center;
   width: 100%;
   max-width: 350px;
-  margin: 30px 0;
+  margin: 20px 0; 
   color: #aaa;
+  font-size: 0.9em; 
 }
 
 .or-divider::before,
@@ -153,23 +176,23 @@ body {
 }
 
 .or-divider span {
-  padding: 0 15px;
+  padding: 0 10px; 
 }
 
 /* --- กลุ่มฟอร์ม (ช่องกรอกข้อมูล) --- */
 .form-group {
   width: 100%;
   max-width: 350px;
-  margin-bottom: 20px;
+  margin-bottom: 15px; 
 }
 
 .form-group input {
   width: 100%;
-  padding: 15px 20px;
+  padding: 12px 18px; 
   border: 1px solid #e0e0e0;
   border-radius: 8px;
   box-sizing: border-box;
-  font-size: 1em;
+  font-size: 0.95em; 
   color: #333;
   background-color: #f8f8f8;
   transition: border-color 0.3s ease;
@@ -184,66 +207,34 @@ body {
   outline: none;
 }
 
-/* --- แถบ "จดจำฉัน" / "ลืมรหัสผ่าน" --- */
-.remember-forgot-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+/* --- ปุ่ม Register --- */
+.login-button { 
   width: 100%;
   max-width: 350px;
-  margin-bottom: 30px;
-  font-size: 0.9em;
-}
-
-.remember-me {
-  display: flex;
-  align-items: center;
-  color: #555;
-  cursor: pointer;
-}
-
-.remember-me input[type="checkbox"] {
-  margin-right: 8px;
-  accent-color: #55c83e;
-}
-
-.forgot-password-link {
-  color: #55c83e;
-  text-decoration: none;
-  transition: color 0.3s ease;
-}
-
-.forgot-password-link:hover {
-  text-decoration: underline;
-}
-
-/* --- ปุ่ม Login --- */
-.login-button {
-  width: 100%;
-  max-width: 350px;
-  padding: 15px;
+  padding: 12px; 
   background-color: #55c83e;
   color: white;
   border: none;
   border-radius: 8px;
-  font-size: 1.1em;
+  font-size: 1em; 
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  margin-bottom: 25px;
+  margin-bottom: 20px; 
 }
 
 .login-button:hover {
   background-color: #43a131;
 }
 
-/* --- ข้อความ "ลงทะเบียน" --- */
-.register-text {
+/* --- ข้อความ "มีบัญชีอยู่แล้ว?" --- */
+.register-text { 
   color: #555;
-  font-size: 0.9em;
+  font-size: 0.85em; 
+  margin-bottom: 20px; 
 }
 
-.register-text .register-link {
+.register-text .register-link { 
   color: #55c83e;
   text-decoration: none;
   font-weight: bold;
@@ -260,9 +251,9 @@ body {
   top: 20px;
   left: 50%;
   transform: translateX(-50%);
-  padding: 12px 25px;
+  padding: 10px 20px; 
   border-radius: 8px;
-  font-size: 1em;
+  font-size: 0.9em; 
   font-weight: bold;
   color: white;
   z-index: 1000;
@@ -319,11 +310,11 @@ body {
     max-width: 100%;
     margin-bottom: 0;
   }
-  .login-panel-right {
+  .register-panel-right { 
     width: 90%;
     max-width: 100%;
     max-height: none;
-    padding: 30px 20px;
+    padding: 25px 15px; 
     margin-right: 0;
     margin-bottom: 0;
   }
@@ -338,9 +329,28 @@ body {
 @media (max-width: 480px) {
   .left-image-container {
     width: 95%;
-    max-height: 200px;
+    max-height: 180px; 
   }
-  .login-panel-right {
-    padding: 20px 15px;
+  .register-panel-right { 
+    padding: 15px 10px; 
+  }
+  .welcome-title {
+    font-size: 2em; 
+  }
+  .design-school-text {
+    font-size: 1.1em; 
+    margin-bottom: 20px;
+  }
+  .social-login-button,
+  .form-group input,
+  .login-button {
+    font-size: 0.9em; 
+    padding: 10px 15px; 
+  }
+  .or-divider {
+    margin: 15px 0;
+  }
+  .register-text {
+    font-size: 0.8em; 
   }
 }
