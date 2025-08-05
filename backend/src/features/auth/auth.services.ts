@@ -1,11 +1,44 @@
 import bcrypt from 'bcrypt';
+import otpGenerator from 'otp-generator';
+
 
 import prisma from '../../config/db.config';
 import passport from '../../config/passport';
-import { Role } from '../../../generated/prisma';
+import { Role, User } from '../../../generated/prisma';
+import transporter from '../../config/email.config';
+
+const sendVerificationOtp = async (email: string) => {
+    const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false });
+
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 5 * 60000);
+
+    // (user as any).verificationOtp = otp;
+    // (user as any).otpExpiresAt = expiresAt;
+
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'รหัสยืนยัน OTP ของคุณ',
+        html: `
+            <h1>รหัสยืนยัน OTP</h1>
+            <p>รหัสยืนยันของคุณคือ: <strong>${otp}</strong></p>
+            <p>รหัสนี้จะหมดอายุใน 5 นาที</p>
+        `,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log(`Verification OTP sent to: ${email}`);
+        return { expiresAt, otp }
+    } catch (err) {
+        console.error(`Failed to send verification OTP to ${email}:`, err);
+        throw new Error('Failed to send verification email.');
+    }
+}
 
 export default {
-    create: async (username: string, email: string, password: string) => {
+    checkUser: async (username: string, email: string, password: string) => {
         //find existing user
         const existingUser = await prisma.user.findFirst({
             where: {
@@ -26,6 +59,10 @@ export default {
                 // return res.status(409).json({ message: 'Email already registered.' });
             }
         }
+        await sendVerificationOtp(email)
+    },
+
+    create: async (username: string, email: string, password: string) => {
 
         //hash password
         const saltRounds = 10;
@@ -35,7 +72,7 @@ export default {
         const newUser = await prisma.user.create({
             data: {
                 username,
-                email: email ? email : null,
+                email,
                 passwordHash,
             }
         })

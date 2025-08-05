@@ -1,16 +1,17 @@
 import { Router, Request, Response, NextFunction } from "express";
+import { isLogedIn, isAuthenticated } from "../../middleware/auth.middleware";
 import authControllers from './auth.controllers';
 import passport from "../../config/passport";
 
 const router = Router()
 
 //local
-router.post('/register', authControllers.create)
-router.post('/login', authControllers.login)
+router.post('/register', isLogedIn, authControllers.checkUser, authControllers.create)
+router.post('/login', isLogedIn, authControllers.login)
 // router.post('/logout', authControllers.logout)
 
 //google
-router.get('/google',
+router.get('/google', isLogedIn,
     passport.authenticate('google', { scope: ['profile', 'email'] }) // ขอสิทธิ์เข้าถึง profile และ email
 );
 
@@ -27,23 +28,6 @@ router.get('/google/callback',
 //     (req, res) => res.redirect('/')
 // )
 
-router.get('/logout',(req: Request, res:Response, next:NextFunction) => {
-    req.logout((err: any) => {
-        if (err) {
-            console.error('Error during Passport logout:', err)
-            return next(err)
-        }
-        req.session.destroy((err: any) => {
-            if (err) {
-                console.error('Error during destroying session:', err)
-                return next(err)
-            }
-
-            res.clearCookie('connect.sid');
-
-            res.status(200).json({ message: 'Logged out successfully' });
-        })
-    })
-} );
+router.get('/logout', isAuthenticated, authControllers.logout );
 
 export default router;

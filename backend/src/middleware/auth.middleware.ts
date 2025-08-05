@@ -3,7 +3,7 @@ import session from 'express-session';
 import { createClient } from 'redis'; // Redis client for redis@4.x
 import RedisStore from 'connect-redis'; // Session store for Redis
 import passport from '../config/passport'; 
-import { Role } from '../../generated/prisma/client';
+import { Role, User } from '../../generated/prisma/client';
 
 // --- Authentication Middleware ---
 // ตรวจสอบว่าผู้ใช้ล็อกอินอยู่หรือไม่
@@ -22,9 +22,18 @@ export function hasRole(role: Role) {
             return res.status(401).json({ message: 'Unauthorized: Please log in.' });
         }
         // ตรวจสอบ role ของผู้ใช้ที่ล็อกอิน
-        if (req.user && req.user.role === role) {
+       const user = req.user as User;
+        if (user && user.role === role) {
             return next();
         }
         res.status(403).json({ message: 'Forbidden: You do not have the necessary permissions.' });
     };
+}
+
+export function isLogedIn(req: Request, res: Response, next: NextFunction) {
+    if (!req.isAuthenticated()) {
+        return next();
+    } else {
+        res.status(401).json({ message: 'you are logged in , pls log out'})
+    }
 }

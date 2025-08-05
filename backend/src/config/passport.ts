@@ -12,22 +12,18 @@ import { Strategy as LocalStrategy } from 'passport-local'; // สำหรั�
 // --- Passport Local Strategy (สำหรับ Username/Password Login) ---
 passport.use(new LocalStrategy(
     {
-        usernameField: 'username', 
+        usernameField: 'loginform', 
         passwordField: 'password',
     },
-    async (username : string, password: string, done: any) => {
+    async (loginform : string, password: string, done: any) => {
         try {
-            console.log(`Username : ${username} and passowrd: ${password}`)
+            console.log(`loginform : ${loginform} and passowrd: ${password}`)
 
-            // const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginform);
-            // const user = await prisma.user.findUnique({
-            //     where: isEmail ? { email: loginform } : { username: loginform }
-            // });
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginform);
             const user = await prisma.user.findUnique({
-                where: {
-                    username
-                }
-            })
+                where: isEmail ? { email: loginform } : { username: loginform }
+            });
+
             if (!user) {
                 return done(null, false, { message: 'Incorrect username or password.' });
             }
@@ -105,14 +101,6 @@ passport.use(new GoogleStrategy(
                 }
                 console.log('Existing user linked with Google:', user.email);
             } 
-            //else {
-            //     // ถ้าพบผู้ใช้และเชื่อมโยงกับ Google ID แล้ว: อัปเดตข้อมูล (ถ้ามี)
-            //     user = await prisma.user.update({
-            //         where: { id: user.id },
-            //         data: { name: name, profilePictureUrl: picture }
-            //     });
-            //     console.log('Existing user logged in with Google:', user.email);
-            // }
 
             // คืน user object เพื่อให้ Passport เก็บใน session
             done(null, user as Express.User);
