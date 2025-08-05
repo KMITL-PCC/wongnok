@@ -4,6 +4,8 @@ import session from 'express-session';
 import passport from './src/config/passport';
 import cors from 'cors';
 import morgan from 'morgan';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 import redisConfig  from './src/config/redis.config';
 import authen from './src/features/auth/auth.routes'
@@ -14,6 +16,8 @@ const app = express();
 const PORT = process.env.PORT || 3001
 
 app.use(express.json())
+app.use(helmet());
+app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(morgan('dev'));
 
 app.use(cors({
@@ -33,7 +37,7 @@ app.use(session({
         maxAge: 24 * 60 * 60 * 1000, // 24 ชั่วโมง (ใน milliseconds)
         httpOnly: true, // ป้องกัน JavaScript client-side เข้าถึง cookie
         secure: process.env.NODE_ENV === 'production', // ส่ง cookie ผ่าน HTTPS เท่านั้นใน Production
-        sameSite: 'lax' // แนะนำสำหรับ CORS, 'none' ถ้าต้องการเปิดกว้างกว่า (ต้องใช้ secure: true)
+        sameSite: process.env.NODE_ENV === 'production'? 'none': 'lax' // แนะนำสำหรับ CORS, 'none' ถ้าต้องการเปิดกว้างกว่า (ต้องใช้ secure: true)
     }
 }));
 
