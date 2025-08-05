@@ -8,7 +8,7 @@ import { Role, User } from '../../../generated/prisma';
 import transporter from '../../config/email.config';
 
 export default {
-    checkUserExistence: async (username: string, email: string, password: string) => {
+    checkUserExistence: async (username: string, email: string) => {
         //find existing user
         const existingUser = await prisma.user.findFirst({
             where: {

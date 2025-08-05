@@ -16,10 +16,10 @@ export default {
         }
 
         try {
-            const result = await authServices.checkUserExistence(username, email, password)
+            const result = await authServices.checkUserExistence(username, email)
 
             if (result && !result.success && result.status) {
-                res.status(result.status).json({ message: result.messeage })
+                return res.status(result.status).json({ message: result.messeage })
             }
 
             const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
@@ -38,8 +38,8 @@ export default {
             }
 
             res.status(200).json({
-            message: 'OTP sent to your email. Please verify to complete registration.'
-        });
+                message: 'OTP sent to your email. Please verify to complete registration.'
+            });
         } catch (err) {
             console.error('ERRORR during user validate', err)
             res.status(500).json({ message: 'Internal server error during registration.' });
@@ -50,7 +50,7 @@ export default {
     registerStep2_verifyOTPandCreateUser: async (req: Request, res: Response, next: NextFunction) => {
         const { otp } = req.body;
 
-        if(!otp) {
+        if (!otp) {
             return res.status(401).json({ message: 'Invalid OTP. Please try again.' });
         }
 

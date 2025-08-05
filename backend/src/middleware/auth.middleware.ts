@@ -37,3 +37,13 @@ export function isLogedIn(req: Request, res: Response, next: NextFunction) {
         res.status(401).json({ message: 'you are logged in , pls log out'})
     }
 }
+
+export function invalidCsrf(err: any, req: Request, res: Response, next: NextFunction) {
+    if (err.code === 'EBADCSRFTOKEN') {
+        return res.status(403).json({
+            message: 'Invalid CSRF token. Please refresh the page and try again.'
+        });
+    }
+
+    next(err);
+}
