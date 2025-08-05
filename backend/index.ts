@@ -4,9 +4,8 @@ import session from 'express-session';
 import passport from './src/config/passport';
 import cors from 'cors';
 import morgan from 'morgan';
-import {createClient} from "redis"
-const RedisStore = require('connect-redis').default;
 
+import redisConfig  from './src/config/redis.config';
 import authen from './src/features/auth/auth.routes'
 
 dotenv.config();
@@ -25,27 +24,9 @@ app.use(cors({
 app.use(express.json()); // สำหรับ parsing application/json
 app.use(express.urlencoded({ extended: true })); // สำหรับ parsing application/x-www-form-urlencoded
 
-// --- ตั้งค่า Redis Client และ Session Store ---
-// const redisClient = new Redis(process.env.REDIS_URL as string);
-const redisClient = createClient({url: process.env.REDIS_URL})
-
-// const client = (<unknown>redisClient) as Client
-
-redisClient.on('error', (err) => console.error('Redis Client Error', err));
-
-(async () => {
-    await redisClient.connect();
-    console.log('Redis client connected successfully!');
-})();
-
-let sessionStore = new RedisStore({
-  client: redisClient,
-  prefix: "sess:",
-})
-
 app.use(session({
     secret: process.env.SESSION_SECRET as string, 
-    store: sessionStore, 
+    store: redisConfig.sessionStore as any, 
     resave: false, // ไม่บันทึก session ซ้ำถ้าไม่มีการเปลี่ยนแปลง
     saveUninitialized: false, // ไม่สร้าง session ใหม่ถ้าไม่มีการเปลี่ยนแปลง
     cookie: {
