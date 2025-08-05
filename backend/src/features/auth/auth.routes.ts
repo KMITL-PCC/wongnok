@@ -6,7 +6,9 @@ import passport from "../../config/passport";
 const router = Router()
 
 //local
-router.post('/register', isLogedIn, authControllers.checkUser, authControllers.create)
+// router.post('/register', isLogedIn, authControllers.checkUser, authControllers.verifyOtp,authControllers.create)
+router.post('/register/send-otp', isLogedIn, authControllers.registerStep1_sendOtp);
+router.post('/register/verify', authControllers.registerStep2_verifyOTPandCreateUser);
 router.post('/login', isLogedIn, authControllers.login)
 // router.post('/logout', authControllers.logout)
 

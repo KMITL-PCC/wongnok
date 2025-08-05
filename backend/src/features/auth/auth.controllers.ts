@@ -6,57 +6,87 @@ import passport from '../../config/passport';
 import { Role, User } from '../../../generated/prisma';
 import authServices from './auth.services';
 
-// const verifyOtp = async (req: Request, res: Response, next: NextFunction) => {
-//     const { otp } = req.body;
-
-//     if (new Date() > new Date(otp.otpExpiresAt)) {
-//         return res.status(401).json({ message: 'OTP has expired. Please request a new one.' });
-//     }
-
-//     return res.status(200).json({ message: 'Email verified successfully.' });
-// }
 export default {
-    //local
-    checkUser: async (req: Request, res: Response, next: NextFunction) => {
+    //send otp to create user email
+    registerStep1_sendOtp: async (req: Request, res: Response, next: NextFunction) => {
         const { username, email, password } = req.body
 
         if (!password && !email && !username) {
-            return res.status(400).json({ message: 'Username or email, and password are required.' });
+            return res.status(400).json({ message: 'Username, email, and password are required.' });
         }
 
         try {
-            const result = await authServices.checkUser(username, email, password)
+            const result = await authServices.checkUserExistence(username, email, password)
 
-            if (result && !result.success) {
-                res.status(result.status ?? 409).json({ message: result.messeage })
+            if (result && !result.success && result.status) {
+                res.status(result.status).json({ message: result.messeage })
             }
+
+            const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
+
+            //hash password
+            const saltRounds = 10;
+            const passwordHash = await bcrypt.hash(password, saltRounds);
+
+            const session = req.session as any;
+            session.registerData = {
+                username,
+                email,
+                passwordHash,
+                otp,
+                expiresAt: expiresAt.toISOString()
+            }
+
+            res.status(200).json({
+            message: 'OTP sent to your email. Please verify to complete registration.'
+        });
         } catch (err) {
             console.error('ERRORR during user validate', err)
             res.status(500).json({ message: 'Internal server error during registration.' });
         }
     },
 
-    create: async (req: Request, res: Response, next: NextFunction) => {
-        const { username, email, password } = req.body
+    // verify otp and create user to db
+    registerStep2_verifyOTPandCreateUser: async (req: Request, res: Response, next: NextFunction) => {
+        const { otp } = req.body;
+
+        if(!otp) {
+            return res.status(401).json({ message: 'Invalid OTP. Please try again.' });
+        }
+
+        const session = req.session as any;
+        if (!session || !session.registerData || !session.registerData.otp) {
+            return res.status(401).json({ message: 'No pending registration. Please start registration again.' });
+        }
+
+        const { username, email, passwordHash, otp: storedOtp, expiresAt: storedExpiresAt } = session.registerData
+
+        if (storedOtp !== otp) {
+            return res.status(401).json({ message: 'Invalid OTP. Please try again.' });
+        }
+
+        if (new Date() > new Date(otp.otpExpiresAt)) {
+            delete session.registrationData;
+            return res.status(401).json({ message: 'OTP has expired. Please request a new one.' });
+        }
 
         try {
-            const result = await authServices.create(username, email, password)
+            const newUser = await authServices.create(username, email, passwordHash)
 
-            console.log(result.user);
-            req.login(result.user as Express.User, (err) => {
+            delete session.registrationData;
+
+            req.login(newUser as Express.User, (err) => {
                 if (err) {
                     console.error('Error auto-logging in after registration:', err);
-                    // ถ้าล็อกอินอัตโนมัติไม่สำเร็จ ยังคงส่ง user data กลับไป
-                    return res.status(201).json({ message: 'User registered successfully, but failed to auto-login. Please try logging in manually.', user: result.user?.username });
+                    return res.status(201).json({ message: 'User registered successfully, but failed to auto-login. Please try logging in manually.', user: newUser.username });
                 }
-                // ส่งข้อมูลผู้ใช้ที่ลงทะเบียนและล็อกอินสำเร็จกลับไป
-                res.status(201).json({ message: 'User registered and logged in successfully!', user: result.user?.username });
+                res.status(201).json({ message: 'User registered and logged in successfully!', user: newUser.username });
             });
-
         } catch (err) {
-            console.error('ERRORR during registration', err)
+            console.error('ERROR during user creation after OTP verification:', err);
             res.status(500).json({ message: 'Internal server error during registration.' });
         }
+
     },
 
     login: async (req: Request, res: Response, next: NextFunction) => {

@@ -7,38 +7,8 @@ import passport from '../../config/passport';
 import { Role, User } from '../../../generated/prisma';
 import transporter from '../../config/email.config';
 
-const sendVerificationOtp = async (email: string) => {
-    const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false });
-
-    const now = new Date();
-    const expiresAt = new Date(now.getTime() + 5 * 60000);
-
-    // (user as any).verificationOtp = otp;
-    // (user as any).otpExpiresAt = expiresAt;
-
-    const mailOptions = {
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: 'รหัสยืนยัน OTP ของคุณ',
-        html: `
-            <h1>รหัสยืนยัน OTP</h1>
-            <p>รหัสยืนยันของคุณคือ: <strong>${otp}</strong></p>
-            <p>รหัสนี้จะหมดอายุใน 5 นาที</p>
-        `,
-    };
-
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Verification OTP sent to: ${email}`);
-        return { expiresAt, otp }
-    } catch (err) {
-        console.error(`Failed to send verification OTP to ${email}:`, err);
-        throw new Error('Failed to send verification email.');
-    }
-}
-
 export default {
-    checkUser: async (username: string, email: string, password: string) => {
+    checkUserExistence: async (username: string, email: string, password: string) => {
         //find existing user
         const existingUser = await prisma.user.findFirst({
             where: {
@@ -51,22 +21,46 @@ export default {
 
         if (existingUser) {
             if (existingUser.username === username) {
-                return { success: false, status: 409, messeage: 'Username already taken.'}
+                return { success: false, status: 409, messeage: 'Username already taken.' }
                 // return res.status(409).json({ message: 'Username already taken.' });
             }
             if (existingUser.email === email) {
-                return { success: false, status: 409, messeage: 'Email already registered.'}
+                return { success: false, status: 409, messeage: 'Email already registered.' }
                 // return res.status(409).json({ message: 'Email already registered.' });
             }
         }
-        await sendVerificationOtp(email)
+
+        return { success: true }
     },
 
-    create: async (username: string, email: string, password: string) => {
+    sendVerificationOtp: async (email: string) => {
+        const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false });
 
-        //hash password
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(password, saltRounds);
+        const now = new Date();
+        const expiresAt = new Date(now.getTime() + 5 * 60000);
+
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: email,
+            subject: 'รหัสยืนยัน OTP ของคุณ',
+            html: `
+            <h1>รหัสยืนยัน OTP</h1>
+            <p>รหัสยืนยันของคุณคือ: <strong>${otp}</strong></p>
+            <p>รหัสนี้จะหมดอายุใน 5 นาที</p>
+        `,
+        };
+
+        try {
+            await transporter.sendMail(mailOptions);
+            console.log(`Verification OTP sent to: ${email}`);
+            return { expiresAt, otp }
+        } catch (err) {
+            console.error(`Failed to send verification OTP to ${email}:`, err);
+            throw new Error('Failed to send verification email.');
+        }
+    },
+
+    create: async (username: string, email: string, passwordHash: string) => {
 
         //create new user
         const newUser = await prisma.user.create({
@@ -78,6 +72,6 @@ export default {
         })
         console.log(newUser)
 
-        return { success: true, user: newUser}
+        return  newUser
     }
 }
