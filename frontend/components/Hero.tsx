@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Image from 'next/image';
 
-export default function HomePage() {
+export default function Hero() {
   // URLs of images referencing from the public folder
   const imageUrls = {
     img1: '/food1.png',
@@ -28,7 +28,7 @@ export default function HomePage() {
           </div>
           <span className="text-xl font-bold text-black hidden sm:block">TasteTrail</span>
         </div>
-        <div className="flex items-center border border-gray-300 rounded-full bg-gray-100 p-2 max-w-xl w-full mx-auto">
+        <div className="flex flex-1 max-w-[900] items-center border border-gray-300 rounded-full bg-gray-100 p-2  w-full mx-auto">
           <Search className="text-gray-500 ml-2" size={20} />
           <Input 
             type="text" 
@@ -89,14 +89,14 @@ export default function HomePage() {
             </div>
             
             {/* ปุ่มกด */}
-            <Button
+            {/* <Button
               className="absolute w-[250px] h-[47.6px] top-[340px] left-[490px] 
                          rounded-[40px] text-sm font-bold
                          bg-green-500 hover:bg-gray-800 text-white"
             >
               <span>LOOK FOR FOOD</span>
               <ArrowRight size={18} className="ml-1" />
-            </Button>
+            </Button> */}
           </div>
         </div>
       </main>

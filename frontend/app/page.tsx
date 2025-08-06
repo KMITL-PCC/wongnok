@@ -1,8 +1,13 @@
-import Homepage from '@/components/Homepage'
+import CallToAction from '@/components/CallToAction';
+import Hero from '@/components/Hero';
+
 
 const HomePage = () => {
   return (
-      <Homepage/>
+    <div>
+      <Hero/>
+      <CallToAction/>
+    </div>
   )
 };
 export default HomePage;
