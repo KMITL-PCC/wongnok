@@ -34,7 +34,7 @@ app.use(express.urlencoded({ extended: true })); // สำหรับ parsing a
 
 app.use(session({
     secret: process.env.SESSION_SECRET as string, 
-    store: redisConfig.sessionStore as any, 
+    store: redisConfig.sessionStore, 
     resave: false, // ไม่บันทึก session ซ้ำถ้าไม่มีการเปลี่ยนแปลง
     saveUninitialized: false, // ไม่สร้าง session ใหม่ถ้าไม่มีการเปลี่ยนแปลง
     rolling: true,

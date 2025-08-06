@@ -2,9 +2,8 @@
 import passport from 'passport';
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 import { Profile } from 'passport-google-oauth20'; // Import Profile type for clarity
-import { Request } from 'express'; // For session type
 import prisma from './db.config'; // Import Prisma client
-import { User as PrismaUser, Role } from '../../generated/prisma/client'; // Import Prisma's User model and Role enum
+import { Role } from '../../generated/prisma/client'; // Import Prisma's User model and Role enum
 import bcrypt from 'bcrypt'; // สำหรับ Local Strategy (ถ้าใช้)
 import { Strategy as LocalStrategy } from 'passport-local'; // สำหรับ Local Strategy (ถ้าใช้)
 
@@ -15,7 +14,7 @@ passport.use(new LocalStrategy(
         usernameField: 'loginform', 
         passwordField: 'password',
     },
-    async (loginform : string, password: string, done: any) => {
+    async (loginform : string, password: string, done) => {
         try {
             console.log(`loginform : ${loginform} and passowrd: ${password}`)
 
@@ -57,7 +56,7 @@ passport.use(new GoogleStrategy(
             const googleId = profile.id;
             const email = profile.emails && profile.emails[0] ? profile.emails[0].value : null;
             const username = profile.displayName || email?.split('@')[0] || 'User';
-            const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
+            // const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
             //const username = `google_${googleId}`; // สร้าง username ที่ไม่ซ้ำกันสำหรับ Google user
 
             if (!email) {
@@ -105,14 +104,14 @@ passport.use(new GoogleStrategy(
             // คืน user object เพื่อให้ Passport เก็บใน session
             done(null, user as Express.User);
 
-        } catch (err) {
-            console.error("Error during Google authentication:", err);
-            done(err, false);
+        } catch (error) {
+            console.error("Error during Google authentication:", error);
+            done(error, false);
         }
     }
 ));
 
-passport.serializeUser((user: any, done) => {
+passport.serializeUser((user, done) => {
     console.log('serializeUser User ID to session:', user.id);
     done(null, user.id);
 });

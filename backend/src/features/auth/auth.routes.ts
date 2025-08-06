@@ -1,4 +1,4 @@
-import { Router, Request, Response, NextFunction } from "express";
+import { Router } from "express";
 import { isLogedIn, isAuthenticated } from "../../middleware/auth.middleware";
 import authControllers from './auth.controllers';
 import passport from "../../config/passport";

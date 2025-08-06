@@ -1,14 +1,12 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcrypt';
 
-import prisma from '../../config/db.config';
 import passport from '../../config/passport';
-import { Role, User } from '../../../generated/prisma';
 import authServices from './auth.services';
 
 export default {
     //send otp to create user email
-    registerStep1_sendOtp: async (req: Request, res: Response, next: NextFunction) => {
+    registerStep1_sendOtp: async (req: Request, res: Response) => {
         const { username, email, password } = req.body
 
         if (!password && !email && !username) {
@@ -47,7 +45,7 @@ export default {
     },
 
     // verify otp and create user to db
-    registerStep2_verifyOTPandCreateUser: async (req: Request, res: Response, next: NextFunction) => {
+    registerStep2_verifyOTPandCreateUser: async (req: Request, res: Response) => {
         const { otp } = req.body;
 
         if (!otp) {
@@ -65,7 +63,7 @@ export default {
             return res.status(401).json({ message: 'Invalid OTP. Please try again.' });
         }
 
-        if (new Date() > new Date(otp.otpExpiresAt)) {
+        if (new Date() > new Date(storedExpiresAt)) {
             delete session.registrationData;
             return res.status(401).json({ message: 'OTP has expired. Please request a new one.' });
         }

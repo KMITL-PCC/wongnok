@@ -12,7 +12,7 @@ redisClient.on('error', (err) => console.error('Redis Client Error', err));
     console.log('Redis client connected successfully!');
 })();
 
-let sessionStore = new RedisStore({
+const sessionStore = new RedisStore({
   client: redisClient,
   prefix: "sess:",
 })

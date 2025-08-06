@@ -1,7 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import session from 'express-session';
-import { createClient } from 'redis'; // Redis client for redis@4.x
-import RedisStore from 'connect-redis'; // Session store for Redis
 import passport from '../config/passport'; 
 import { Role, User } from '../../generated/prisma/client';
 
