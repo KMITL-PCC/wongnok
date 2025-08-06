@@ -119,7 +119,7 @@ export default function RegisterForm() {
 
       {/* Container หลักของฟอร์ม */}
       <div className="flex-grow flex items-center justify-center">
-        <div className="w-full max-w-sm space-y-6 bg-white p-6 sm:p-8 rounded-lg shadow-lg">
+        <div className="w-full max-w-sm space-y-6">
 
           {/* ส่วนหัว */}
           <div className="text-center">
