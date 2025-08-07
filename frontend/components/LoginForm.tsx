@@ -56,14 +56,14 @@ export default function LoginForm() {
 
     try {
       // URL Backend API สำหรับ Login 
-      const backendUrl = 'http://localhost:8080/api/login'; 
+      const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL; 
 
-      const response = await fetch(backendUrl, {
+      const response = await fetch((`${backendURL}/`), {
         method: 'POST', // ใช้ method POST สำหรับการ Login
         headers: {
           'Content-Type': 'application/json', 
         },
-        body: JSON.stringify(values), // แปลง Object values ให้เป็น JSON string
+        body: JSON.stringify(values) // แปลง Object values ให้เป็น JSON string
       });
 
       if (response.ok) { // ตรวจสอบว่า Response มีสถานะเป็น OK (2xx) หรือไม่

@@ -1,21 +1,17 @@
-import React from 'react'
-import { Button } from "@/components/ui/button"
-import {ArrowRight, Icon } from 'lucide-react';
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight, Icon } from "lucide-react";
 
 const CallToAction = () => {
   return (
     <div>
       {/* ปุ่มกด */}
-            <Button
-              className="absolute w-[250px] h-[47.6px] top-[500px] left-[645px] 
-                         rounded-[40px] text-sm font-bold
-                         bg-green-500 hover:bg-gray-800 text-white"
-            >
-              <span>LOOK FOR FOOD</span>
-              <ArrowRight size={18} className="ml-1" />
-            </Button>   
+      <Button className="absolute top-[500px] left-[590px] h-[47.6px] w-[250px] rounded-[40px] bg-green-500 text-sm font-bold text-white hover:bg-gray-800">
+        <span>LOOK FOR FOOD</span>
+        <ArrowRight size={18} className="ml-1" />
+      </Button>
     </div>
-  )
-}
+  );
+};
 
-export default CallToAction
+export default CallToAction;
