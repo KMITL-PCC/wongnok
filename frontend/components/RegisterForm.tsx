@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react" // เพิ่มการใช้ useState
+import { useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
@@ -89,13 +89,22 @@ export default function RegisterForm() {
     });
 
     try {
-      // ** จำลองการเรียก Backend API สำหรับการลงทะเบียน **
-      // ในการใช้งานจริง ควรแทนที่ด้วย URL API จริงของคุณ
-      // เราจะจำลองการทำงานที่สำเร็จเพื่อเปลี่ยนไปหน้า OTP
-      const response = { ok: true, json: () => Promise.resolve({ message: "Registration successful" }) };
+      // URL Backend API สำหรับการลงทะเบียนจริง
+      const registerBackendUrl = 'http://localhost:8080/api/register';
+
+      const response = await fetch(registerBackendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        }),
+      });
 
       if (response.ok) {
-        // ถ้าลงทะเบียนสำเร็จ ให้เปลี่ยนไปแสดงฟอร์ม OTP
         setRegistrationEmail(values.email);
         setShowOtpForm(true);
         toast.success("Registration Successful!", {
@@ -126,10 +135,19 @@ export default function RegisterForm() {
     });
 
     try {
-      // ** จำลองการเรียก Backend API สำหรับยืนยัน OTP **
-      // ในการใช้งานจริง ควรแทนที่ด้วย URL API จริงของคุณ
-      // เราจะจำลองการทำงานที่สำเร็จ
-      const response = { ok: true, json: () => Promise.resolve({ message: "OTP verification successful" }) };
+      // URL Backend API สำหรับยืนยัน OTP จริง
+      const otpBackendUrl = 'http://localhost:8080/api/verify-otp';
+
+      const response = await fetch(otpBackendUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: registrationEmail,
+          otp: values.otp,
+        }),
+      });
 
       if (response.ok) {
         const data = await response.json();
