@@ -1,167 +1,247 @@
-// src/app/RegisterForm.tsx
-"use client";
+"use client"
 
-import React, { useState, useEffect } from 'react';
-import "@/app/register.css";
-import { ArrowLeft, Home } from 'lucide-react'; 
+import { zodResolver } from "@hookform/resolvers/zod"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { Button } from "@/components/ui/button"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { toast } from "sonner" // สมมติว่า sonner มีให้ใช้งานสำหรับ toast notifications
+import { ArrowLeft } from 'lucide-react' // สมมติว่า lucide-react มีให้ใช้งานสำหรับไอคอน
 
-const RegisterForm = () => {
-  const [username, setUsername] = useState(''); 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [errorMessage, setErrorMessage] = useState('');
-  const [showErrorPopup, setShowErrorPopup] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+// คอมโพเนนต์ Google Icon (นำกลับมาใช้จากโค้ดที่คุณให้มา)
+const GoogleIcon = () => (
+  <svg className="w-5 h-5 mr-3" viewBox="0 0 48 48">
+    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
+    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
+    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
+    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,35.836,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
+  </svg>
+);
 
-  useEffect(() => {
-    if (showErrorPopup) {
-      const timer = setTimeout(() => {
-        setShowErrorPopup(false);
-        setErrorMessage('');
-      }, 3000);
-      return () => clearTimeout(timer);
+// กำหนด Schema สำหรับฟอร์มลงทะเบียนโดยใช้ Zod
+const formSchema = z.object({
+  username: z.string().min(2, {
+    message: "Username must be at least 2 characters.",
+  }),
+  email: z.string().email({
+    message: "Please enter a valid email address.",
+  }),
+  password: z.string().min(6, {
+    message: "Password must be at least 6 characters.",
+  }),
+  confirmPassword: z.string().min(6, {
+    message: "Confirm password must be at least 6 characters.",
+  }),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match.", // ข้อความแสดงข้อผิดพลาดถ้ารหัสผ่านไม่ตรงกัน
+  path: ["confirmPassword"], // ข้อผิดพลาดนี้จะผูกกับฟิลด์ confirmPassword
+});
+
+export default function RegisterForm() {
+  // เริ่มต้น react-hook-form ด้วย Zod resolver และค่าเริ่มต้น
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      username: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
+
+  // ฟังก์ชันสำหรับจัดการการส่งฟอร์ม
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    console.log("ข้อมูลการลงทะเบียน:", values); // บันทึกข้อมูลฟอร์ม
+
+    // แสดง Toast Notification เพื่อระบุว่ากำลังประมวลผล
+    toast.info("Registering account...", {
+      description: `Username: ${values.username}`,
+      duration: 2000,
+    });
+
+    try {
+      // URL Backend API สำหรับการลงทะเบียน
+      // สำคัญ: แทนที่ 'http://localhost:8080/api/register' ด้วย Endpoint Backend จริงของคุณ
+      const backendUrl = 'http://localhost:8080/api/register';
+
+      const response = await fetch(backendUrl, {
+        method: 'POST', // ใช้เมธอด POST สำหรับการลงทะเบียน
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        // ส่ง username, email และ password ไปยัง Backend
+        body: JSON.stringify({
+          username: values.username,
+          email: values.email,
+          password: values.password,
+        }),
+      });
+
+      if (response.ok) { // ตรวจสอบว่าสถานะการตอบกลับเป็น OK (2xx) หรือไม่
+        const data = await response.json(); // อ่านข้อมูล JSON จากการตอบกลับ
+        console.log("Registration successful:", data);
+        toast.success("Registration Successful!", {
+          description: "Your account has been created. You can now log in.",
+        });
+        // เลือกที่จะเปลี่ยนเส้นทางไปยังหน้า Login หรือหน้าหลักหลังจากลงทะเบียนสำเร็จ
+        // window.location.href = "/login";
+      } else {
+        const errorData = await response.json(); // อ่านข้อมูลข้อผิดพลาดจากการตอบกลับ
+        console.error("Registration failed:", errorData);
+        toast.error("Registration Failed", {
+          description: errorData.message || "Something went wrong. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("ข้อผิดพลาดในการเชื่อมต่อ:", error);
+      toast.error("Connection Error", {
+        description: "Unable to connect to the server. Please try again.",
+      });
     }
-  }, [showErrorPopup]);
-
-  const handleSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-
-    // <<< ปรับการตรวจสอบฟิลด์ให้รวม Username ด้วย
-    if (username === '' || email === '' || password === '' || confirmPassword === '') {
-      setErrorMessage('Please fill in all fields.');
-      setShowErrorPopup(true);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setErrorMessage('Passwords do not match.');
-      setShowErrorPopup(true);
-      return;
-    }
-
-    setErrorMessage('Registration Successful!');
-    setShowErrorPopup(true);
-    // ในโปรเจกต์จริง คุณจะต้องส่งข้อมูลไปยัง Backend เพื่อลงทะเบียน
-    console.log({ username, email, password }); 
-  };
-
-  const handleImageLoad = () => {
-    setImageLoaded(true);
-  };
-
-  const handleGoBack = () => {
-    alert('Go back to previous page!');
-    
-  };
-
-  const handleGoHome = () => { // <<< ฟังก์ชันสำหรับปุ่ม Home
-    alert('Go to Home page!');
-    
-  };
+  }
 
   return (
-    <div className="full-screen-container">
-      {/* Arrow Back Button (ซ้ายบน) */}
-      <button onClick={handleGoBack} className="back-arrow-button">
-        <ArrowLeft size={28} color="#555" />
-      </button>
-
-      {/* Home Icon Button (ขวาบน) */}
-      <button onClick={handleGoHome} className="home-icon-button"> 
-        <Home size={28} color="#555" />
-      </button>
-
-      {/* Popup Error/Success Message */}
-      {showErrorPopup && (
-        <div className={`popup-message ${errorMessage.includes('Successful') ? 'success' : 'error'}`}>
-          {errorMessage}
-        </div>
-      )}
-
-      {/* Left Image Container */}
-      <div className={`left-image-container ${imageLoaded ? 'loaded' : ''}`}>
-        <img
-          src="/images/restaurant.jpg"
-          alt="Restaurant"
-          className="restaurant-image"
-          onLoad={handleImageLoad}
-        />
+    <div className="flex flex-col min-h-screen bg-white p-4 sm:p-6 md:p-10">
+      {/* ส่วนของลูกศรย้อนกลับ */}
+      <div className="w-full">
+        <Button variant="ghost" className="rounded-full p-2">
+          <ArrowLeft size={24} className="w-6 h-6 sm:w-8 sm:h-8 text-gray-700" />
+        </Button>
       </div>
 
-      {/* Register Panel on the Right */}
-      <div className="register-panel-right">
-        <h1 className="welcome-title">Create Account</h1>
-        <h2 className="design-school-text">to Get Started</h2>
+      {/* Container หลักของฟอร์ม */}
+      <div className="flex-grow flex items-center justify-center">
+        <div className="w-full max-w-sm space-y-6">
 
-        {/* <<< เพิ่มช่องกรอก Username */}
-        <div className="form-group">
-          <input
-            type="text" 
-            id="username"
-            placeholder="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-          />
+          {/* ส่วนหัว */}
+          <div className="text-center">
+            <h1 className="text-3xl sm:text-4xl font-bold text-gray-900">Create Account</h1>
+          </div>
+
+          {/* ฟอร์มลงทะเบียน */}
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+              {/* ฟิลด์ชื่อผู้ใช้ */}
+              <FormField
+                control={form.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 font-medium">Username</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Choose a username"
+                        {...field}
+                        className="h-11 sm:h-12 text-base rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              {/* ฟิลด์อีเมล */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 font-medium">Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        {...field}
+                        className="h-11 sm:h-12 text-base rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              {/* ฟิลด์รหัสผ่าน */}
+              <FormField
+                control={form.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 font-medium">Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Create a password"
+                        {...field}
+                        className="h-11 sm:h-12 text-base rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              {/* ฟิลด์ยืนยันรหัสผ่าน */}
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-700 font-medium">Confirm Password</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm your password"
+                        {...field}
+                        className="h-11 sm:h-12 text-base rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-red-500 text-sm" />
+                  </FormItem>
+                )}
+              />
+
+              {/* ปุ่มลงทะเบียน */}
+              <Button
+                type="submit"
+                className="w-full h-12 sm:h-14 text-lg font-semibold bg-green-500 hover:bg-green-600 text-white rounded-md shadow-md transition-colors duration-200"
+              >
+                Register
+              </Button>
+            </form>
+          </Form>
+
+          {/* เส้นคั่น "หรือ" */}
+          <div className="flex items-center space-x-3 mt-6"> {/* เพิ่ม mt-6 เพื่อเพิ่มระยะห่างจากปุ่ม Register */}
+            <hr className="flex-grow border-gray-300" />
+            <span className="text-gray-500 text-sm">or</span>
+            <hr className="flex-grow border-gray-300" />
+          </div>
+
+          {/* ปุ่มลงทะเบียนด้วย Google */}
+          <Button variant="outline" className="w-full h-11 sm:h-12 text-base sm:text-lg font-medium rounded-md border-gray-300 hover:bg-gray-50 transition-colors duration-200">
+            <GoogleIcon />
+            Register with Google
+          </Button>
+
+          {/* ลิงก์เข้าสู่ระบบ */}
+          <div className="text-center text-sm mt-4">
+            <p className="text-gray-600">Already have an account?{' '}
+              <a href="#" className="font-semibold text-green-600 hover:underline">
+                Login
+              </a>
+            </p>
+          </div>
+
         </div>
-
-        <div className="form-group">
-          <input
-            type="email"
-            id="email"
-            placeholder="Your Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group password-group">
-          <input
-            type="password"
-            id="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <div className="form-group password-group">
-          <input
-            type="password"
-            id="confirmPassword"
-            placeholder="Confirm Password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <button type="submit" className="login-button" onClick={handleSubmit}>
-          Register Now
-        </button>
-
-        <p className="register-text">
-          Already have an account?{' '}
-          <a href="#" className="register-link" onClick={() => alert('Go to Login page.')}>
-            Login
-          </a>
-        </p>
-        
-        {/* <<< ย้ายปุ่ม Google มาไว้ข้างล่างสุด */}
-        <div className="or-divider"> {/* อาจจะไม่จำเป็นถ้ามีปุ่มเดียว แต่คงไว้เผื่ออนาคต */}
-          <span>OR</span>
-        </div>
-        <button className="social-login-button google-button" onClick={() => alert('Sign up with Google clicked!')}>
-          <img src="https://img.icons8.com/color/16/000000/google-logo.png" alt="Google logo" className="social-icon" />
-          Sign up with Google
-        </button>
-
       </div>
     </div>
   );
-};
-
-export default RegisterForm;
+}
