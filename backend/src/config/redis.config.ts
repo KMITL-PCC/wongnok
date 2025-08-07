@@ -3,8 +3,6 @@ const RedisStore = require('connect-redis').default;
 
 const redisClient = createClient({url: process.env.REDIS_URL})
 
-// const client = (<unknown>redisClient) as Client
-
 redisClient.on('error', (err) => console.error('Redis Client Error', err));
 
 (async () => {

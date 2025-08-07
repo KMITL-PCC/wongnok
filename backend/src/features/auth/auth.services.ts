@@ -34,7 +34,8 @@ export default {
     },
 
     sendVerificationOtp: async (email: string) => {
-        const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false });
+        const otp = otpGenerator.generate(6, { digits: true, upperCaseAlphabets: false, specialChars: false, lowerCaseAlphabets: false });
+
 
         const now = new Date();
         const expiresAt = new Date(now.getTime() + 5 * 60000);
@@ -72,6 +73,6 @@ export default {
         })
         console.log(newUser)
 
-        return  newUser
+        return newUser
     }
 }

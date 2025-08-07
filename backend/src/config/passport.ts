@@ -111,7 +111,7 @@ passport.use(new GoogleStrategy(
     }
 ));
 
-passport.serializeUser((user, done) => {
+passport.serializeUser((user: any, done) => {
     console.log('serializeUser User ID to session:', user.id);
     done(null, user.id);
 });
