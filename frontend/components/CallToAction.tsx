@@ -1,21 +1,22 @@
-import React from 'react'
-import { Button } from "@/components/ui/button"
-import {ArrowRight, Icon } from 'lucide-react';
+// src/app/CallToAction.tsx
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
 
 const CallToAction = () => {
   return (
-    <div>
-      {/* ปุ่มกด */}
-            <Button
-              className="absolute w-[250px] h-[47.6px] top-[500px] left-[645px] 
-                         rounded-[40px] text-sm font-bold
-                         bg-green-500 hover:bg-gray-800 text-white"
-            >
-              <span>LOOK FOR FOOD</span>
-              <ArrowRight size={18} className="ml-1" />
-            </Button>   
+    // This button is positioned absolutely relative to its parent container in the Hero component.
+    // It will appear centered below the desktop image gallery.
+    <div className="absolute bottom-95 left-1/2 w-full -translate-x-1/2 transform text-center">
+      <Button className="group inline-flex h-auto items-center rounded-full bg-green-500 px-6 py-2 text-sm font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-green-600">
+        <span>LOOK FOR FOOD</span>
+        <ArrowRight
+          size={18}
+          className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
+        />
+      </Button>
     </div>
-  )
-}
+  );
+};
 
-export default CallToAction
+export default CallToAction;
