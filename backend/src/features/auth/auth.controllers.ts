@@ -3,8 +3,6 @@ import bcrypt from "bcrypt";
 
 import passport from "../../config/passport";
 import authServices from "./auth.services";
-import { verify } from "crypto";
-import { userInfo } from "os";
 import { logoutAllDevices } from "../../model/redis.model";
 
 export default {
@@ -25,13 +23,13 @@ export default {
         return res.status(result.status).json({ message: result.messeage });
       }
 
-      // const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
-      const otp = 123456;
-      const expiresAt = "2025-08-08T09:09:48.925Z";
+      const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
 
       //hash password
       const saltRounds = 10;
       const passwordHash = await bcrypt.hash(password, saltRounds);
+
+      const otpHashed = await bcrypt.hash(otp, 5);
 
       const session = req.session as any;
       // console.log(session)
@@ -39,7 +37,7 @@ export default {
         username,
         email,
         passwordHash,
-        otp,
+        otp: otpHashed,
         expiresAt: expiresAt,
         // expiresAt: expiresAt.toISOString()
       };
@@ -111,7 +109,9 @@ export default {
         .status(401)
         .json({ message: "OTP has expired. Please request a new one." });
     }
-    if (storedOtp !== otp) {
+
+    const verify = await bcrypt.compare(otp, storedOtp);
+    if (!verify) {
       return res
         .status(401)
         .json({ message: "Invalid OTP. Please try again." });
@@ -219,7 +219,7 @@ export default {
       //send otp
       const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
       const saltRounds = 5;
-      const otpHashed = await bcrypt.hash(otp, 5);
+      const otpHashed = await bcrypt.hash(otp, saltRounds);
 
       const session = req.session as any;
       session.forgotData = {
@@ -376,8 +376,6 @@ export default {
       });
     }
 
-    console.log(session);
-
     const { email } = session.forgotData || session.userdata;
 
     if (!email) {
@@ -391,12 +389,11 @@ export default {
 
       const updatePass = await authServices.updatePassword(email, passwordHash);
 
-      delete session.otp;
-      if (session.forgotData) {
-        delete session.forgotData;
-      }
-      // delete session.forgotData
-      // logoutAllDevices(session.forgotData)
+      // delete session.otp;
+      // if (session.forgotData) {
+      //   delete session.forgotData;
+      // }
+      logoutAllDevices(updatePass.id);
 
       res.status(200).json({
         message: "Update password success",
