@@ -1,6 +1,13 @@
 import { LogIn, Menu, Search, UserPlus } from "lucide-react";
 import { Input } from "../ui/input";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 import Image from "next/image";
 import logo from "@/public/logo.svg";
@@ -8,8 +15,8 @@ import Link from "next/link";
 
 const Header = () => {
   return (
-    <header className="bg-background sticky top-0 z-50 w-full border">
-      <div className="mx-auto flex items-center justify-between gap-8 px-8 py-4 md:px-14">
+    <header className="sticky top-0 z-50 w-full border bg-background">
+      <div className="flex items-center justify-between gap-8 px-8 py-4 mx-auto md:px-14">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image
@@ -25,25 +32,26 @@ const Header = () => {
         </Link>
 
         {/* Search */}
-        <div className="relative hidden max-w-xl flex-1 md:flex">
-          <Search className="absolute top-1/2 left-2 -translate-y-1/2" />
+        <form className="relative flex-1 max-w-xl">
+          <Search className="absolute -translate-y-1/2 top-1/2 left-2" />
           <Input
             type="text"
             placeholder="Search"
-            className="max-w-5xl rounded-full border pl-10 focus-visible:ring-0"
+            name="search"
+            className="max-w-5xl pl-10 border rounded-full border-border focus-visible:ring-0"
           />
-        </div>
+        </form>
 
         {/* Auth action */}
-        <div className="hidden items-center gap-2 md:flex">
-          <Button variant="outline" className="rounded-full">
+        <div className="items-center hidden gap-2 md:flex">
+          <Button variant="outline" className="rounded-full" asChild>
             <Link href="/register" className="flex items-center gap-2">
               <UserPlus size={20} />
               <span>สมัครสมาชิก</span>
             </Link>
           </Button>
 
-          <Button className="rounded-full">
+          <Button className="rounded-full" asChild>
             <Link href="/login" className="flex items-center gap-2">
               <LogIn size={20} />
               <span>เข้าสู่ระบบ</span>
@@ -51,9 +59,26 @@ const Header = () => {
           </Button>
         </div>
 
-        <div className="md:hidden">
-          <Menu />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger className="md:hidden">
+            <Menu size={20} />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="mt-5">
+            <DropdownMenuItem>
+              <Link href="/register" className="flex items-center gap-2">
+                <UserPlus size={20} />
+                <span>สมัครสมาชิก</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem>
+              <Link href="/login" className="flex items-center gap-2">
+                <LogIn size={20} />
+                <span>เข้าสู่ระบบ</span>
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </header>
   );

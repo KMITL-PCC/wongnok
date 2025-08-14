@@ -1,13 +1,12 @@
-import CallToAction from '@/components/CallToAction';
-import Hero from '@/components/Hero';
-
+import CallToAction from "@/components/auth/CallToAction";
+import Hero from "@/components/home/Hero";
 
 const HomePage = () => {
   return (
     <div>
-      <Hero/>
-      <CallToAction/>
+      <Hero />
+      <CallToAction />
     </div>
-  )
+  );
 };
 export default HomePage;
