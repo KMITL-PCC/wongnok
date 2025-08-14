@@ -21,6 +21,7 @@ export default {
           success: false,
           status: 409,
           messeage: "Username already taken.",
+          isLocal: existingUser?.passwordHash !== null,
         };
         // return res.status(409).json({ message: 'Username already taken.' });
       }
@@ -29,6 +30,7 @@ export default {
           success: false,
           status: 409,
           messeage: "Email already registered.",
+          isLocal: existingUser?.passwordHash !== null,
         };
         // return res.status(409).json({ message: 'Email already registered.' });
       }
@@ -51,11 +53,14 @@ export default {
     const mailOptions = {
       from: process.env.EMAIL_USER,
       to: email,
-      subject: "รหัสยืนยัน OTP ของคุณ",
+      subject: "Verify Tastetrail OTP",
       html: `
-            <h1>รหัสยืนยัน OTP</h1>
-            <p>รหัสยืนยันของคุณคือ: <strong>${otp}</strong></p>
-            <p>รหัสนี้จะหมดอายุใน 5 นาที</p>
+            <h1>DEAR CUSTOMER TASTETRAIL</h1>
+            <p>Thank you for use my website (tastetrail)</p>
+            <p style="color: red;">Your OTP number is <strong>${otp}</strong></p>
+            <p>This is OTP will expires in 5 minutes</p>
+            <p>Use this password for verify OTP</p>
+            <p>Thank you</p>
         `,
     };
 
@@ -92,5 +97,6 @@ export default {
         passwordHash,
       },
     });
+    return updatePassword;
   },
 };

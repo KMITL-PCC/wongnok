@@ -4,6 +4,8 @@ import bcrypt from "bcrypt";
 import passport from "../../config/passport";
 import authServices from "./auth.services";
 import { verify } from "crypto";
+import { userInfo } from "os";
+import { logoutAllDevices } from "../../model/redis.model";
 
 export default {
   //send otp to create user email
@@ -198,14 +200,19 @@ export default {
     try {
       //find user
       //return success.true = not found return success false = found
-      const isDontHaveUser = await authServices.checkUserNotExistence(
+      const isDoentHaveUser = await authServices.checkUserNotExistence(
         "",
         email
       );
-
-      if (isDontHaveUser && isDontHaveUser.success) {
+      if (isDoentHaveUser && isDoentHaveUser.success) {
         return res.status(400).json({
           message: "Can't find user or email pls try again",
+        });
+      }
+
+      if (isDoentHaveUser && !isDoentHaveUser.isLocal) {
+        return res.status(400).json({
+          message: "Can't change password. You can only login by google",
         });
       }
 
@@ -267,8 +274,9 @@ export default {
 
     try {
       const { otp: storedOtp, expiresAt: storedExpiresAt } = session.otp;
+      console.log(session);
 
-      const verify = bcrypt.compare(otp, storedOtp);
+      const verify = await bcrypt.compare(otp, storedOtp);
 
       if (!verify) {
         return res
@@ -310,15 +318,23 @@ export default {
 
   resendOTP: async (req: Request, res: Response) => {
     const session = req.session as any;
-    const { email } = session.forgotData;
-    const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
 
-    session.otp = {
-      otp,
-      expiresAt: expiresAt.toISOString(),
-    };
+    if (!session || !session.otp || !session.otp.otp) {
+      return res.status(401).json({
+        message: "No pending registration. Please start registration again.",
+      });
+    }
+
+    const { email } = session.forgotData;
 
     try {
+      const { otp, expiresAt } = await authServices.sendVerificationOtp(email);
+
+      session.otp = {
+        otp,
+        expiresAt: expiresAt.toISOString(),
+      };
+
       req.session.save((err) => {
         if (err) {
           console.error("Failed to save session:", err);
@@ -359,16 +375,32 @@ export default {
         message: "You not verify access pls try again later",
       });
     }
-    const { email } = session.forgotData.email || session.userdata;
 
+    console.log(session);
+
+    const { email } = session.forgotData || session.userdata;
+
+    if (!email) {
+      return res.status(401).json({
+        message: "No pending registration. Please start registration again.",
+      });
+    }
     try {
       const saltRounds = 10;
       const passwordHash = await bcrypt.hash(newPassword, saltRounds);
 
       const updatePass = await authServices.updatePassword(email, passwordHash);
 
+      delete session.otp;
+      if (session.forgotData) {
+        delete session.forgotData;
+      }
+      // delete session.forgotData
+      // logoutAllDevices(session.forgotData)
+
       res.status(200).json({
         message: "Update password success",
+        userInfo: updatePass,
       });
     } catch (error: unknown) {
       if (error instanceof Error) {

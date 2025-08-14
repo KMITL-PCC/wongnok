@@ -1,5 +1,9 @@
 import { Router } from "express";
-import { isLogedIn, isAuthenticated } from "../../middleware/auth.middleware";
+import {
+  isLogedIn,
+  isAuthenticated,
+  hasRole,
+} from "../../middleware/auth.middleware";
 import authControllers from "./auth.controllers";
 import passport from "../../config/passport";
 import rateLimit from "express-rate-limit";
@@ -7,25 +11,37 @@ import rateLimit from "express-rate-limit";
 const router = Router();
 
 //local
-// router.post('/register', isLogedIn, authControllers.checkUser, authControllers.verifyOtp,authControllers.create)
 router.post(
   "/register/send-otp",
   isLogedIn,
   authControllers.registerStep1_sendOtp
 );
+
 router.post(
   "/register/verify",
   authControllers.registerStep2_verifyOTPandCreateUser
 );
 router.post("/login", isLogedIn, authControllers.login);
+
 router.post(
   "/forgotPass",
-  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
+  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }), //5req : 20 minutes
   authControllers.forgotPass
 );
-router.post("/otp", authControllers.OTPverify);
-router.post("/resend-otp", authControllers.resendOTP);
-router.patch("/updatepass", authControllers.updatePass);
+
+router.post(
+  "/verify-otp",
+  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
+  authControllers.OTPverify
+);
+
+router.post(
+  "/resend-otp",
+  rateLimit({ windowMs: 5 * 60 * 1000, max: 10 }),
+  authControllers.resendOTP
+);
+
+router.patch("/updatepass", isAuthenticated, authControllers.updatePass);
 
 //google
 router.get(
@@ -42,11 +58,6 @@ router.get(
     failureRedirect: process.env.FRONTEND_URL + "/fail", // Redirect ไปยังหน้า Login ของ Frontend เมื่อล็อกอินไม่สำเร็จ
   })
 );
-
-// router.get('/google/callback',
-//     passport.authenticate('google', {failureRedirect: '/'}),
-//     (req, res) => res.redirect('/')
-// )
 
 router.get("/logout", isAuthenticated, authControllers.logout);
 

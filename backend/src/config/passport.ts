@@ -1,4 +1,4 @@
-import passport from "passport";
+import passport, { session } from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Profile } from "passport-google-oauth20"; // Import Profile type for clarity
 import prisma from "./db.config"; // Import Prisma client
