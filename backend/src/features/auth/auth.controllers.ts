@@ -4,6 +4,7 @@ import bcrypt from "bcrypt";
 import passport from "../../config/passport";
 import authServices from "./auth.services";
 import { logoutAllDevices } from "../../model/redis.model";
+import { User } from "../../../generated/prisma";
 
 export default {
   //send otp to create user email
@@ -163,7 +164,7 @@ export default {
           if (err) {
             return next(err);
           }
-          res.status(200).json({ message: "Logged in success", user });
+          res.status(200).json({ message: "Logged in success" });
         });
       }
     )(req, res, next);
@@ -412,5 +413,18 @@ export default {
         });
       }
     }
+  },
+
+  getUserData: async (req: Request, res: Response) => {
+    const user = req.user as User;
+
+    res.status(200).json({
+      user: {
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        profilePictureUrl: user.profilePictureUrl,
+      },
+    });
   },
 };

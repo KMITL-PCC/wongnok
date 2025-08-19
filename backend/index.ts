@@ -52,7 +52,16 @@ app.use(
   })
 );
 
-// app.use(csurf({ cookie: true }));
+app.use(
+  csurf({
+    cookie: {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 60 * 60 * 1000,
+    },
+  })
+);
 
 app.use(passport.initialize());
 app.use(passport.session());

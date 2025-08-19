@@ -13,15 +13,23 @@ const router = Router();
 //local
 router.post(
   "/register/send-otp",
+  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
   isLogedIn,
   authControllers.registerStep1_sendOtp
 );
 
 router.post(
   "/register/verify",
+  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
   authControllers.registerStep2_verifyOTPandCreateUser
 );
-router.post("/login", isLogedIn, authControllers.login);
+
+router.post(
+  "/login",
+  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
+  isLogedIn,
+  authControllers.login
+);
 
 router.post(
   "/forgotPass",
@@ -37,7 +45,7 @@ router.post(
 
 router.post(
   "/resend-otp",
-  rateLimit({ windowMs: 5 * 60 * 1000, max: 10 }),
+  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
   authControllers.resendOTP
 );
 
@@ -46,6 +54,7 @@ router.patch("/updatepass", isAuthenticated, authControllers.updatePass);
 //google
 router.get(
   "/google",
+  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
   isLogedIn,
   passport.authenticate("google", { scope: ["profile", "email"] }) // ขอสิทธิ์เข้าถึง profile และ email
 );
@@ -58,6 +67,8 @@ router.get(
     failureRedirect: process.env.FRONTEND_URL + "/fail", // Redirect ไปยังหน้า Login ของ Frontend เมื่อล็อกอินไม่สำเร็จ
   })
 );
+
+router.get("/me", isAuthenticated, authControllers.getUserData);
 
 router.get("/logout", isAuthenticated, authControllers.logout);
 
