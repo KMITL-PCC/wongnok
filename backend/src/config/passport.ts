@@ -65,6 +65,7 @@ passport.use(
       done: (error: any, user?: Express.User | false) => void
     ) => {
       try {
+        const provider = "google";
         const googleId = profile.id;
         const email =
           profile.emails && profile.emails[0] ? profile.emails[0].value : null;
@@ -79,39 +80,52 @@ passport.use(
           );
         }
 
-        // ค้นหาผู้ใช้ด้วย googleId หรือ email
-        let user = await prisma.user.findFirst({
+        // ค้นหาผู้ใช้ด้วย googleId
+        let googleUser = await prisma.account.findFirst({
           where: {
-            OR: [{ googleId: googleId }, { email: email }],
+            provider,
+            providerId: googleId,
+          },
+          include: {
+            user: true,
           },
         });
 
-        if (!user) {
-          // ถ้าไม่พบผู้ใช้: สร้างบัญชีใหม่
-          user = await prisma.user.create({
-            data: {
-              username: username, // กำหนด username สำหรับ Google user
-              email: email,
-              googleId: googleId,
-              role: Role.User, // ใช้ Role enum จาก Prisma
+        let user;
+        if (googleUser) {
+          user = googleUser.user;
+        } else {
+          user = await prisma.user.findUnique({
+            where: {
+              email,
             },
           });
-          console.log("New user registered with Google:", user.email);
-        } else if (!user.googleId) {
-          // ถ้าพบบัญชีเดิมด้วยอีเมล แต่ยังไม่มี googleId: เชื่อมโยงบัญชี
-          // ควรตรวจสอบว่า username ไม่ซ้ำกันก่อน update
-          if (!user.username) {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { googleId: googleId, username: username }, // ตั้ง username ให้ Google user ด้วย
+
+          // มี email แต่ไม่เคยเข้าผ่าน google
+          if (user) {
+            await prisma.account.create({
+              data: {
+                provider,
+                providerId: googleId,
+                userId: user.id,
+              },
             });
           } else {
-            user = await prisma.user.update({
-              where: { id: user.id },
-              data: { googleId: googleId },
+            //ผู้ใช้ใหม่
+            user = await prisma.user.create({
+              data: {
+                username,
+                email,
+                role: Role.User,
+                accounts: {
+                  create: {
+                    provider,
+                    providerId: googleId,
+                  },
+                },
+              },
             });
           }
-          console.log("Existing user linked with Google:", user.email);
         }
 
         // คืน user object เพื่อให้ Passport เก็บใน session
