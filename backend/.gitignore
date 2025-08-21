@@ -5,3 +5,5 @@ node_modules
 /generated/prisma
 pgadmin
 prisma/migrations
+
+coverage/

@@ -40,7 +40,7 @@ export default {
   },
 
   sendVerificationOtp: async (email: string) => {
-    const otp = otpGenerator.generate(6, {
+    const otp = otpGenerator.generate(5, {
       digits: true,
       upperCaseAlphabets: false,
       specialChars: false,
@@ -65,7 +65,7 @@ export default {
     };
 
     try {
-      transporter.sendMail(mailOptions);
+      await transporter.sendMail(mailOptions);
       console.log(`Verification OTP sent to: ${email}`);
       return { expiresAt, otp };
     } catch (err) {
@@ -83,7 +83,7 @@ export default {
         passwordHash,
       },
     });
-    console.log(newUser);
+    console.log(newUser.username);
 
     return newUser;
   },

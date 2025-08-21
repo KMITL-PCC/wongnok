@@ -90,7 +90,6 @@ export default {
     }
 
     const session = req.session as any;
-    console.log(session);
     if (!session || !session.registerData || !session.registerData.otp) {
       return res.status(401).json({
         message: "No pending registration. Please start registration again.",
