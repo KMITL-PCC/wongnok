@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // ✅ 1. Import useRouter
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -77,6 +78,7 @@ const otpFormSchema = z.object({
 });
 
 export default function RegisterForm() {
+  const router = useRouter(); // ✅ 2. ประกาศใช้งาน router
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
@@ -178,6 +180,7 @@ export default function RegisterForm() {
     }
   }
 
+  // ✅ 3. แก้ไขฟังก์ชัน onOtpSubmit ทั้งหมด
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
     if (!csrfToken) {
       toast.error("Security Error", {
@@ -207,13 +210,17 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("OTP verification successful:", data);
+        console.log("OTP verification successful");
+
         toast.success("Account Verified!", {
           description:
-            "Your account has been successfully verified. You can now log in.",
+            "Your account is verified. Redirecting to the homepage...",
         });
-        // window.location.href = "/login";
+
+        // หน่วงเวลา 2 วินาทีเพื่อให้ผู้ใช้อ่านข้อความ แล้วค่อย redirect
+        setTimeout(() => {
+          router.push("/"); // พาไปยังหน้าหลัก
+        }, 2000);
       } else {
         const errorData = await response.json();
         console.error("OTP verification failed:", errorData);
