@@ -1,4 +1,3 @@
-// tsconfig.json
 {
   "compilerOptions": {
     "target": "es2022",                  /* กำหนดเวอร์ชันของ JavaScript ที่จะคอมไพล์ไปเป็น (เช่น ES2022) */
