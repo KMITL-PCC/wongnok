@@ -30,16 +30,16 @@ export default function Hero() {
           >
             {/* Box 1 (Contains 2 images) - Moved down */}
             <div className="relative top-1/4 flex flex-col gap-4">
-              <div className="group h-50 w-full overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
+              <div className="group border-primary h-50 w-full overflow-hidden rounded-2xl border-t-4 border-l-4">
                 <img
-                  src={imageUrls.img4}
+                  src={imageUrls.img2}
                   alt="Food 4" // Correct
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
               </div>
               <div className="group h-20 w-full overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
                 <img
-                  src={imageUrls.img6}
+                  src={imageUrls.img1}
                   alt="Food 6" // ✅ Corrected
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
@@ -49,7 +49,7 @@ export default function Hero() {
             {/* Box 2 */}
             <div className="group overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
               <img
-                src={imageUrls.img2}
+                src={imageUrls.img3}
                 alt="Food 2" // ✅ Corrected
                 className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
@@ -59,7 +59,7 @@ export default function Hero() {
             <div className="flex items-start justify-center">
               <div className="group h-60 w-full overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
                 <img
-                  src={imageUrls.img1}
+                  src={imageUrls.img4}
                   alt="Food 1" // ✅ Corrected
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
@@ -69,7 +69,7 @@ export default function Hero() {
             {/* Box 4 */}
             <div className="group overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
               <img
-                src={imageUrls.img3}
+                src={imageUrls.img5}
                 alt="Food 3" // ✅ Corrected
                 className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
@@ -79,14 +79,14 @@ export default function Hero() {
             <div className="relative top-1/4 flex flex-col gap-4">
               <div className="group h-50 w-full overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
                 <img
-                  src={imageUrls.img5}
+                  src={imageUrls.img7}
                   alt="Food 5" // ✅ Corrected
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
               </div>
               <div className="group h-20 w-full overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
                 <img
-                  src={imageUrls.img7}
+                  src={imageUrls.img6}
                   alt="Food 7" // Correct
                   className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
                 />
@@ -121,28 +121,6 @@ export default function Hero() {
               <img
                 src={imageUrls.img4}
                 alt="Food 4"
-                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
-            </div>
-            <div className="group col-span-2 aspect-video overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
-              <img
-                src={imageUrls.img5}
-                alt="Food 5"
-                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
-            </div>
-            {/* ✅ Added missing images for mobile view */}
-            <div className="group aspect-square overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
-              <img
-                src={imageUrls.img6}
-                alt="Food 6"
-                className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
-              />
-            </div>
-            <div className="group aspect-square overflow-hidden rounded-2xl border-t-4 border-l-4 border-green-500">
-              <img
-                src={imageUrls.img7}
-                alt="Food 7"
                 className="h-full w-full object-cover transition-transform duration-300 ease-in-out group-hover:scale-105"
               />
             </div>
