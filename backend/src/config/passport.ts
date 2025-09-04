@@ -70,7 +70,8 @@ passport.use(
         const email =
           profile.emails && profile.emails[0] ? profile.emails[0].value : null;
         const username = profile.displayName || email?.split("@")[0] || "User";
-        // const picture = profile.photos && profile.photos[0] ? profile.photos[0].value : null;
+        const picture =
+          profile.photos && profile.photos[0] ? profile.photos[0].value : null;
         //const username = `google_${googleId}`; // สร้าง username ที่ไม่ซ้ำกันสำหรับ Google user
 
         if (!email) {
@@ -116,6 +117,7 @@ passport.use(
               data: {
                 username,
                 email,
+                profilePictureUrl: picture,
                 role: Role.User,
                 accounts: {
                   create: {
