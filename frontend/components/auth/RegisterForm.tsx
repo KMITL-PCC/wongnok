@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react"; // MODIFIED: Import useEffect
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
-// Google Icon Component
+// Google Icon Component (unchanged)
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 48 48">
     <path
@@ -39,7 +39,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Schema for the registration form using Zod
+// Schemas (unchanged)
 const registerFormSchema = z
   .object({
     username: z.string().min(2, {
@@ -60,7 +60,6 @@ const registerFormSchema = z
     path: ["confirmPassword"],
   });
 
-// Schema for the OTP form
 const otpFormSchema = z.object({
   otp: z
     .string()
@@ -73,11 +72,38 @@ const otpFormSchema = z.object({
 });
 
 export default function RegisterForm() {
-  // State to manage switching between registration and OTP forms
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
+  const [csrfToken, setCsrfToken] = useState<string | null>(null); // NEW: State for CSRF token
 
-  // Initialize react-hook-form for the registration form
+  // NEW: Fetch CSRF token when the component mounts
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const response = await fetch(`${backendURL}/api/csrf-token`);
+        if (response.ok) {
+          const data = await response.json();
+          setCsrfToken(data.csrfToken); // Assumes backend sends { csrfToken: '...' }
+          console.log("CSRF Token fetched successfully.");
+        } else {
+          console.error("Failed to fetch CSRF token");
+          toast.error("Security Error", {
+            description: "Could not initialize a secure session.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching CSRF token:", error);
+        toast.error("Connection Error", {
+          description: "Could not connect to the server for security setup.",
+        });
+      }
+    };
+
+    fetchCsrfToken();
+  }, []); // Empty dependency array ensures this runs only once on mount
+
+  // Form initializations (unchanged)
   const registerForm = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -88,7 +114,6 @@ export default function RegisterForm() {
     },
   });
 
-  // Initialize react-hook-form for the OTP form
   const otpForm = useForm<z.infer<typeof otpFormSchema>>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: {
@@ -96,9 +121,14 @@ export default function RegisterForm() {
     },
   });
 
-  // Function to handle registration form submission
+  // MODIFIED: Function to handle registration form submission
   async function onRegisterSubmit(values: z.infer<typeof registerFormSchema>) {
-    console.log("Registration data:", values);
+    if (!csrfToken) {
+      toast.error("Security Error", {
+        description: "Cannot submit form. Secure token is missing.",
+      });
+      return;
+    }
 
     toast.info("Registering account...", {
       description: `Username: ${values.username}`,
@@ -107,11 +137,11 @@ export default function RegisterForm() {
 
     try {
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       const response = await fetch(`${backendURL}/auth/register/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
         },
         body: JSON.stringify({
           username: values.username,
@@ -143,9 +173,14 @@ export default function RegisterForm() {
     }
   }
 
-  // Function to handle OTP form submission
+  // MODIFIED: Function to handle OTP form submission
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
-    console.log("OTP data:", values);
+    if (!csrfToken) {
+      toast.error("Security Error", {
+        description: "Cannot submit form. Secure token is missing.",
+      });
+      return;
+    }
 
     toast.info("Verifying OTP...", {
       description: `Code: ${values.otp}`,
@@ -154,11 +189,11 @@ export default function RegisterForm() {
 
     try {
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      console.log(backendURL);
       const response = await fetch(`${backendURL}/auth/register/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
         },
         body: JSON.stringify({
           email: registrationEmail,
@@ -192,20 +227,19 @@ export default function RegisterForm() {
     }
   }
 
-  // Function to go back from OTP form to registration form
+  // Other functions (unchanged)
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
-    registerForm.reset(); // Reset the registration form values
+    registerForm.reset();
   };
 
-  // NEW: Function to handle Google login
   const handleGoogleLogin = () => {
     const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
     window.location.href = `${backendURL}/auth/google`;
   };
 
-  // OTP Verification Form Component
+  // JSX for OTP and Register forms (unchanged)
   const OtpVerificationForm = () => (
     <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -265,7 +299,6 @@ export default function RegisterForm() {
     </div>
   );
 
-  // Main Registration Form Component
   const RegisterMainForm = () => (
     <div className="w-full max-w-sm space-y-6 pt-14">
       <div className="text-center">
