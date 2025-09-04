@@ -7,9 +7,9 @@ import {
   CardTitle,
 } from "../ui/card";
 
-const RestaurantCard = () => {
+const SecondaryRestaurantCard = () => {
   return (
-    <Card className="p-0">
+    <Card className="gap-2 p-0 pb-2">
       <CardHeader className="flex flex-col gap-2 p-0">
         <div className="relative w-full h-40">
           <Image
@@ -19,13 +19,16 @@ const RestaurantCard = () => {
             className="object-cover rounded-t-lg"
           />
         </div>
-        <CardTitle className="px-2">ผัดไทย</CardTitle>
-        <CardDescription className="px-2">ผัดไทยออนไลน์</CardDescription>
+        <CardTitle className="px-2 md:px-4">ผัดไทย</CardTitle>
+        <CardDescription className="px-2 md:px-4">
+          ผัดไทยออนไลน์
+        </CardDescription>
       </CardHeader>
-      <CardContent className="p-0">
-        <p>RestaurantCard</p>
+      <CardContent className="flex gap-2 px-2 text-sm md:px-4">
+        <p>Star</p>
+        <p>Review</p>
       </CardContent>
     </Card>
   );
 };
-export default RestaurantCard;
+export default SecondaryRestaurantCard;
