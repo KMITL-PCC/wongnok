@@ -54,12 +54,13 @@ app.use(
 
 app.use(
   csurf({
-    cookie: {
-      httpOnly: true,
-      sameSite: "strict",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 1000,
-    },
+    cookie: true,
+    // cookie: {
+    //   httpOnly: true,
+    //   sameSite: "strict",
+    //   secure: process.env.NODE_ENV === "production",
+    //   maxAge: 60 * 60 * 1000,
+    // },
   })
 );
 
@@ -72,6 +73,13 @@ app.use("/auth", authen);
 app.get("/api/csrf-token", (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
 });
+
+app.post("/test", (req, res) => {
+  console.log("Incoming CSRF token:", req.headers["x-csrf-token"]);
+  console.log("Session:", req.session);
+  res.send("ok");
+});
+
 app.get("/", (req, res) => {
   res.send("hello world");
 });

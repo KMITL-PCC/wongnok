@@ -63,10 +63,10 @@ const registerFormSchema = z
 const otpFormSchema = z.object({
   otp: z
     .string()
-    .length(6, {
-      message: "OTP must be exactly 6 digits.",
+    .length(5, {
+      message: "OTP must be exactly 5 digits.",
     })
-    .regex(/^\d{6}$/, {
+    .regex(/^\d{5}$/, {
       message: "OTP must contain only digits.",
     }),
 });
@@ -81,7 +81,9 @@ export default function RegisterForm() {
     const fetchCsrfToken = async () => {
       try {
         const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-        const response = await fetch(`${backendURL}/api/csrf-token`);
+        const response = await fetch(`${backendURL}/api/csrf-token`, {
+          credentials: "include",
+        });
         if (response.ok) {
           const data = await response.json();
           setCsrfToken(data.csrfToken); // Assumes backend sends { csrfToken: '...' }
@@ -137,11 +139,12 @@ export default function RegisterForm() {
 
     try {
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      // const response = await fetch(`${backendURL}/test`, {
       const response = await fetch(`${backendURL}/auth/register/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
+          "X-CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
         },
         body: JSON.stringify({
           username: values.username,
