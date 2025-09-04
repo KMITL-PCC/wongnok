@@ -12,10 +12,9 @@ export default {
     const { username, email, password } = req.body;
 
     if (!password && !email && !username) {
-      return res
-        .status(400)
-        .json({ message: "Username, email, and password are required." });
+      return res.status(400).json({ message: "Missing user data" });
     }
+
     console.log(req.body);
     try {
       const result = await authServices.checkUserNotExistence(username, email);

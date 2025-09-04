@@ -1,6 +1,5 @@
 import authServices from "../auth.services";
 import prisma from "../../../config/db.config";
-import bcrypt from "bcrypt";
 import transporter from "../../../config/email.config";
 import otpGenerator from "otp-generator";
 
