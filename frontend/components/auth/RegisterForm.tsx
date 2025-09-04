@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 
-// คอมโพเนนต์ Google Icon
+// Google Icon Component
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 48 48">
     <path
@@ -39,7 +39,7 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// กำหนด Schema สำหรับฟอร์มลงทะเบียนโดยใช้ Zod
+// Schema for the registration form using Zod
 const registerFormSchema = z
   .object({
     username: z.string().min(2, {
@@ -60,7 +60,7 @@ const registerFormSchema = z
     path: ["confirmPassword"],
   });
 
-// กำหนด Schema สำหรับฟอร์ม OTP
+// Schema for the OTP form
 const otpFormSchema = z.object({
   otp: z
     .string()
@@ -73,11 +73,11 @@ const otpFormSchema = z.object({
 });
 
 export default function RegisterForm() {
-  // สร้าง state เพื่อจัดการการแสดงผลระหว่างฟอร์มลงทะเบียนและฟอร์ม OTP
+  // State to manage switching between registration and OTP forms
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
 
-  // เริ่มต้น react-hook-form สำหรับฟอร์มลงทะเบียน
+  // Initialize react-hook-form for the registration form
   const registerForm = useForm<z.infer<typeof registerFormSchema>>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -88,7 +88,7 @@ export default function RegisterForm() {
     },
   });
 
-  // เริ่มต้น react-hook-form สำหรับฟอร์ม OTP
+  // Initialize react-hook-form for the OTP form
   const otpForm = useForm<z.infer<typeof otpFormSchema>>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: {
@@ -96,9 +96,9 @@ export default function RegisterForm() {
     },
   });
 
-  // ฟังก์ชันสำหรับจัดการการส่งฟอร์มลงทะเบียน
+  // Function to handle registration form submission
   async function onRegisterSubmit(values: z.infer<typeof registerFormSchema>) {
-    console.log("ข้อมูลการลงทะเบียน:", values);
+    console.log("Registration data:", values);
 
     toast.info("Registering account...", {
       description: `Username: ${values.username}`,
@@ -106,8 +106,6 @@ export default function RegisterForm() {
     });
 
     try {
-      // URL Backend API สำหรับการลงทะเบียนจริง
-
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
       console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       const response = await fetch(`${backendURL}/auth/register/send-otp`, {
@@ -138,16 +136,16 @@ export default function RegisterForm() {
         });
       }
     } catch (error) {
-      console.error("ข้อผิดพลาดในการเชื่อมต่อ:", error);
+      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
-  // ฟังก์ชันสำหรับจัดการการส่งฟอร์ม OTP
+  // Function to handle OTP form submission
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
-    console.log("ข้อมูล OTP:", values);
+    console.log("OTP data:", values);
 
     toast.info("Verifying OTP...", {
       description: `Code: ${values.otp}`,
@@ -155,7 +153,6 @@ export default function RegisterForm() {
     });
 
     try {
-      // URL Backend API สำหรับยืนยัน OTP จริง
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
       console.log(backendURL);
       const response = await fetch(`${backendURL}/auth/register/verify`, {
@@ -177,7 +174,7 @@ export default function RegisterForm() {
           description:
             "Your account has been successfully verified. You can now log in.",
         });
-        // เมื่อยืนยันสำเร็จ สามารถเปลี่ยนเส้นทางไปยังหน้า Login
+        // Redirect to login page upon successful verification
         // window.location.href = "/login";
       } else {
         const errorData = await response.json();
@@ -188,21 +185,27 @@ export default function RegisterForm() {
         });
       }
     } catch (error) {
-      console.error("ข้อผิดพลาดในการเชื่อมต่อ:", error);
+      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
-  // ฟังก์ชันสำหรับย้อนกลับจากหน้า OTP ไปหน้าลงทะเบียน
+  // Function to go back from OTP form to registration form
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
-    registerForm.reset(); // รีเซ็ตค่าฟอร์มลงทะเบียน
+    registerForm.reset(); // Reset the registration form values
   };
 
-  // ฟอร์มสำหรับยืนยัน OTP
+  // NEW: Function to handle Google login
+  const handleGoogleLogin = () => {
+    const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    window.location.href = `${backendURL}/auth/google`;
+  };
+
+  // OTP Verification Form Component
   const OtpVerificationForm = () => (
     <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -262,17 +265,9 @@ export default function RegisterForm() {
     </div>
   );
 
-  // ฟอร์มสำหรับลงทะเบียน
+  // Main Registration Form Component
   const RegisterMainForm = () => (
-    <div className="w-full max-w-sm space-y-6">
-      <div className="w-full">
-        <Button variant="ghost" className="rounded-full p-2">
-          <ArrowLeft
-            size={24}
-            className="h-6 w-6 text-gray-700 sm:h-8 sm:w-8"
-          />
-        </Button>
-      </div>
+    <div className="w-full max-w-sm space-y-6 pt-14">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
           Create Account
@@ -382,6 +377,7 @@ export default function RegisterForm() {
       <Button
         variant="outline"
         className="h-11 w-full rounded-md border-gray-300 text-base font-medium transition-colors duration-200 hover:bg-gray-50 sm:h-12 sm:text-lg"
+        onClick={handleGoogleLogin}
       >
         <GoogleIcon />
         Register with Google
@@ -406,5 +402,3 @@ export default function RegisterForm() {
     </div>
   );
 }
-
-("Update");
