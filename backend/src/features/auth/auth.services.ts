@@ -3,7 +3,7 @@ import otpGenerator from "otp-generator";
 
 import prisma from "../../config/db.config";
 import passport from "../../config/passport";
-import { Role, User } from "../../../generated/prisma";
+import { Role, User } from "@prisma/client";
 import transporter from "../../config/email.config";
 
 export default {

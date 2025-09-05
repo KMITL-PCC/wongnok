@@ -2,7 +2,7 @@ import passport, { session } from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Profile } from "passport-google-oauth20"; // Import Profile type for clarity
 import prisma from "./db.config"; // Import Prisma client
-import { Role } from "../../generated/prisma/client"; // Import Prisma's User model and Role enum
+import { Role } from "@prisma/client"; // Import Prisma's User model and Role enum
 import bcrypt from "bcrypt"; // สำหรับ Local Strategy (ถ้าใช้)
 import { Strategy as LocalStrategy } from "passport-local"; // สำหรับ Local Strategy (ถ้าใช้)
 

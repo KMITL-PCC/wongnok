@@ -3,7 +3,7 @@ import prisma from "../../../config/db.config";
 import transporter from "../../../config/email.config";
 import otpGenerator from "otp-generator";
 
-import { Role } from "../../../../generated/prisma";
+import { Role } from "@prisma/client";
 
 jest.mock("../../../config/db.config", () => ({
   user: {

@@ -1,4 +1,4 @@
-const RestaurantsPage = () => {
+const RestaurantsPage = async () => {
   return (
     <div>
       <h1>Restaurants</h1>
