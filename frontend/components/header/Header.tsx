@@ -1,6 +1,6 @@
 "use client";
 
-import { LogIn, Menu, Search, UserPlus } from "lucide-react";
+import { LogIn, Menu, Search, User, UserPlus } from "lucide-react";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import {
@@ -81,6 +81,7 @@ const Header = () => {
             TasteTrail
           </span>
         </Link>
+
         {/* Search */}
         <form className="relative flex-1 max-w-xl">
           <Search className="absolute -translate-y-1/2 top-1/2 left-2" />
@@ -91,25 +92,41 @@ const Header = () => {
             className="max-w-5xl pl-10 border rounded-full border-border focus-visible:ring-0"
           />
         </form>
+
         {/* Auth action */}
+        {/* desktop */}
         <div className="items-center hidden gap-2 md:flex">
           {userInfo ? (
             // Show user info when authenticated
             <div className="flex items-center gap-2">
-              <span className="text-sm">สวัสดี, {userInfo.user?.username}</span>
-              <Button
-                variant="outline"
-                className="rounded-full"
-                onClick={() => {
-                  userLogout().then(() => {
-                    setUserInfo(null);
-                    router.push("/");
-                  });
-                }}
-              >
-                <LogIn size={20} />
-                <span>ออกจากระบบ</span>
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger>
+                  <User
+                    size={30}
+                    className="border rounded-full border-border"
+                  />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="mt-2">
+                  <DropdownMenuItem>
+                    <Link href="/profile" className="flex items-center gap-2">
+                      <User size={20} />
+                      <span>ข้อมูลส่วนตัว</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    className="flex items-center gap-2"
+                    onClick={() => {
+                      userLogout().then(() => {
+                        setUserInfo(null);
+                        router.push("/");
+                      });
+                    }}
+                  >
+                    <LogIn size={20} />
+                    <span>ออกจากระบบ</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           ) : (
             // Show login/register when not authenticated
@@ -130,6 +147,7 @@ const Header = () => {
             </>
           )}
         </div>
+
         <DropdownMenu>
           <DropdownMenuTrigger className="md:hidden">
             <Menu size={20} />
@@ -139,7 +157,13 @@ const Header = () => {
               // Show user options when authenticated
               <>
                 <DropdownMenuItem>
-                  <span>สวัสดี, {userInfo.user?.username}</span>
+                  <Link href="/profile" className="flex items-center gap-2">
+                    <User
+                      size={20}
+                      className="border rounded-full border-border"
+                    />
+                    <span>ข้อมูลส่วนตัว</span>
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
