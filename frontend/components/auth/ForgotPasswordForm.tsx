@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-// import Link from "next/link"; // This line is removed to fix the error
-// import { ArrowLeft, Home } from "lucide-react"; // Icons removed
 
-// NEW: Define the backend URL. In a real Next.js app, this would come from environment variables.
-const NEXT_PUBLIC_BACKEND_URL = "http://172.20.10.13:3001";
+// The backend URL is correctly defined here and will be used throughout the component.
+const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -22,7 +20,6 @@ const ForgotPasswordForm = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // NEW: State to store the CSRF token
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
   // This effect will hide the message after 3 seconds
@@ -35,13 +32,13 @@ const ForgotPasswordForm = () => {
     }
   }, [message]);
 
-  // NEW: This effect fetches the CSRF token when the component mounts.
+  // This effect fetches the CSRF token when the component mounts.
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
-        const response = await fetch(
-          `${NEXT_PUBLIC_BACKEND_URL}/api/csrf-token`,
-        );
+        const response = await fetch(`${backendURL}/api/csrf-token`, {
+          credentials: "include",
+        });
         if (!response.ok) {
           throw new Error("Network response was not ok");
         }
@@ -55,7 +52,7 @@ const ForgotPasswordForm = () => {
       }
     };
     fetchCsrfToken();
-  }, []);
+  }, []); // The dependency array is empty, so this runs once on mount
 
   // This effect handles the countdown timer
   useEffect(() => {
@@ -66,7 +63,7 @@ const ForgotPasswordForm = () => {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // CHANGE: Handles the initial email submission with real API call
+  // Handles the initial email submission with real API call
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -86,18 +83,15 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      const response = await fetch(
-        `${NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "CSRF-Token": csrfToken,
-          },
-          body: JSON.stringify({ email }),
+      const response = await fetch(`${backendURL}/auth/forgotPass`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
         },
-      );
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -116,7 +110,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // CHANGE: Handles the OTP submission with real API call
+  // Handles the OTP submission with real API call
   const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -135,18 +129,15 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      const response = await fetch(
-        `${NEXT_PUBLIC_BACKEND_URL}/auth/verify-otp`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "CSRF-Token": csrfToken,
-          },
-          body: JSON.stringify({ email, otp }),
+      const response = await fetch(`${backendURL}/auth/verify-otp`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
         },
-      );
+        body: JSON.stringify({ otp }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -164,7 +155,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // CHANGE: Handles the final password reset submission with real API call
+  // Handles the final password reset submission with real API call
   const handlePasswordSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -185,18 +176,15 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      const response = await fetch(
-        `${NEXT_PUBLIC_BACKEND_URL}/auth/reset-password`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "CSRF-Token": csrfToken,
-          },
-          body: JSON.stringify({ email, password }),
+      const response = await fetch(`${backendURL}/auth/reset-password`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
         },
-      );
+        body: JSON.stringify({ newPassword: password }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -221,7 +209,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // CHANGE: Handles the resend OTP request with real API call
+  // Handles the resend OTP request with real API call
   const handleResendOtp = async () => {
     if (countdown > 0) return;
 
@@ -235,18 +223,15 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      const response = await fetch(
-        `${NEXT_PUBLIC_BACKEND_URL}/auth/resend-otp`,
-        {
-          method: "POST",
-          credentials: "include",
-          headers: {
-            "Content-Type": "application/json",
-            "CSRF-Token": csrfToken,
-          },
-          body: JSON.stringify({ email }),
+      const response = await fetch(`${backendURL}/auth/resend-otp`, {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
         },
-      );
+        body: JSON.stringify({ email }),
+      });
 
       const data = await response.json();
       if (!response.ok) {
@@ -272,11 +257,8 @@ const ForgotPasswordForm = () => {
   };
 
   return (
-    // Main container - Changed items-start back to items-center
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-10 pb-64 font-sans">
-      {/* Back and Home icons have been removed */}
-
-      {/* Popup Message - Shared between all forms */}
+      {/* Popup Message */}
       {message && (
         <div
           className={`absolute top-20 rounded-md px-4 py-3 text-sm font-medium ${messageType === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
