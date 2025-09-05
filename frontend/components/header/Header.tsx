@@ -1,6 +1,6 @@
 import { LogIn, Menu, Search, UserPlus } from "lucide-react";
 import { Input } from "../ui/input";
-import { Button, buttonVariants } from "../ui/button";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -84,6 +84,3 @@ const Header = () => {
   );
 };
 export default Header;
-
-{
-}
