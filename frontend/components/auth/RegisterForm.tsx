@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // ✅ 1. Import useRouter
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,8 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
-// คอมโพเนนต์ Google Icon
+// Google Icon Component (unchanged)
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 48 48">
     <path
@@ -39,7 +41,6 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// กำหนด Schema สำหรับฟอร์มลงทะเบียนโดยใช้ Zod
 const registerFormSchema = z
   .object({
     username: z.string().min(2, {
@@ -54,41 +55,73 @@ const registerFormSchema = z
     confirmPassword: z.string().min(6, {
       message: "Confirm password must be at least 6 characters.",
     }),
+    terms: z.boolean().refine((val) => val === true, {
+      message: "You must accept the terms and conditions.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
 
-// กำหนด Schema สำหรับฟอร์ม OTP
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
+
 const otpFormSchema = z.object({
   otp: z
     .string()
-    .length(6, {
-      message: "OTP must be exactly 6 digits.",
+    .length(5, {
+      message: "OTP must be exactly 5 digits.",
     })
-    .regex(/^\d{6}$/, {
+    .regex(/^\d{5}$/, {
       message: "OTP must contain only digits.",
     }),
 });
 
 export default function RegisterForm() {
-  // สร้าง state เพื่อจัดการการแสดงผลระหว่างฟอร์มลงทะเบียนและฟอร์ม OTP
+  const router = useRouter(); // ✅ 2. ประกาศใช้งาน router
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
-  // เริ่มต้น react-hook-form สำหรับฟอร์มลงทะเบียน
-  const registerForm = useForm<z.infer<typeof registerFormSchema>>({
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      try {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const response = await fetch(`${backendURL}/api/csrf-token`, {
+          credentials: "include",
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setCsrfToken(data.csrfToken);
+          console.log("CSRF Token fetched successfully.");
+        } else {
+          console.error("Failed to fetch CSRF token");
+          toast.error("Security Error", {
+            description: "Could not initialize a secure session.",
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching CSRF token:", error);
+        toast.error("Connection Error", {
+          description: "Could not connect to the server for security setup.",
+        });
+      }
+    };
+    fetchCsrfToken();
+  }, []);
+
+  const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
+      terms: false,
     },
+    mode: "onChange",
   });
 
-  // เริ่มต้น react-hook-form สำหรับฟอร์ม OTP
   const otpForm = useForm<z.infer<typeof otpFormSchema>>({
     resolver: zodResolver(otpFormSchema),
     defaultValues: {
@@ -96,9 +129,13 @@ export default function RegisterForm() {
     },
   });
 
-  // ฟังก์ชันสำหรับจัดการการส่งฟอร์มลงทะเบียน
-  async function onRegisterSubmit(values: z.infer<typeof registerFormSchema>) {
-    console.log("ข้อมูลการลงทะเบียน:", values);
+  async function onRegisterSubmit(values: RegisterFormValues) {
+    if (!csrfToken) {
+      toast.error("Security Error", {
+        description: "Cannot submit form. Secure token is missing.",
+      });
+      return;
+    }
 
     toast.info("Registering account...", {
       description: `Username: ${values.username}`,
@@ -106,14 +143,12 @@ export default function RegisterForm() {
     });
 
     try {
-      // URL Backend API สำหรับการลงทะเบียนจริง
-
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      console.log(process.env.NEXT_PUBLIC_BACKEND_URL);
       const response = await fetch(`${backendURL}/auth/register/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
           username: values.username,
@@ -138,16 +173,21 @@ export default function RegisterForm() {
         });
       }
     } catch (error) {
-      console.error("ข้อผิดพลาดในการเชื่อมต่อ:", error);
+      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
-  // ฟังก์ชันสำหรับจัดการการส่งฟอร์ม OTP
+  // ✅ 3. แก้ไขฟังก์ชัน onOtpSubmit ทั้งหมด
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
-    console.log("ข้อมูล OTP:", values);
+    if (!csrfToken) {
+      toast.error("Security Error", {
+        description: "Cannot submit form. Secure token is missing.",
+      });
+      return;
+    }
 
     toast.info("Verifying OTP...", {
       description: `Code: ${values.otp}`,
@@ -155,13 +195,12 @@ export default function RegisterForm() {
     });
 
     try {
-      // URL Backend API สำหรับยืนยัน OTP จริง
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      console.log(backendURL);
       const response = await fetch(`${backendURL}/auth/register/verify`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
           email: registrationEmail,
@@ -171,14 +210,17 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("OTP verification successful:", data);
+        console.log("OTP verification successful");
+
         toast.success("Account Verified!", {
           description:
-            "Your account has been successfully verified. You can now log in.",
+            "Your account is verified. Redirecting to the homepage...",
         });
-        // เมื่อยืนยันสำเร็จ สามารถเปลี่ยนเส้นทางไปยังหน้า Login
-        // window.location.href = "/login";
+
+        // หน่วงเวลา 2 วินาทีเพื่อให้ผู้ใช้อ่านข้อความ แล้วค่อย redirect
+        setTimeout(() => {
+          router.push("/"); // พาไปยังหน้าหลัก
+        }, 2000);
       } else {
         const errorData = await response.json();
         console.error("OTP verification failed:", errorData);
@@ -188,21 +230,24 @@ export default function RegisterForm() {
         });
       }
     } catch (error) {
-      console.error("ข้อผิดพลาดในการเชื่อมต่อ:", error);
+      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
-  // ฟังก์ชันสำหรับย้อนกลับจากหน้า OTP ไปหน้าลงทะเบียน
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
-    registerForm.reset(); // รีเซ็ตค่าฟอร์มลงทะเบียน
+    registerForm.reset();
   };
 
-  // ฟอร์มสำหรับยืนยัน OTP
+  const handleGoogleLogin = () => {
+    const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+    window.location.href = `${backendURL}/auth/google`;
+  };
+
   const OtpVerificationForm = () => (
     <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -242,7 +287,7 @@ export default function RegisterForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter 6-digit code"
+                    placeholder="Enter 5-digit code"
                     {...field}
                     className="h-11 rounded-md border-gray-300 text-center text-base tracking-widest focus:border-green-500 focus:ring-green-500 sm:h-12"
                   />
@@ -262,17 +307,8 @@ export default function RegisterForm() {
     </div>
   );
 
-  // ฟอร์มสำหรับลงทะเบียน
   const RegisterMainForm = () => (
-    <div className="w-full max-w-sm space-y-6">
-      <div className="w-full">
-        <Button variant="ghost" className="rounded-full p-2">
-          <ArrowLeft
-            size={24}
-            className="h-6 w-6 text-gray-700 sm:h-8 sm:w-8"
-          />
-        </Button>
-      </div>
+    <div className="w-full max-w-sm space-y-6 pt-14">
       <div className="text-center">
         <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
           Create Account
@@ -364,9 +400,43 @@ export default function RegisterForm() {
             )}
           />
 
+          <FormField
+            control={registerForm.control}
+            name="terms"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md py-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  {/* MODIFIED: Added whitespace-nowrap */}
+                  <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
+                    I agree to the {""}
+                    <a href="/terms" className="underline hover:text-green-600">
+                      Terms of Service
+                    </a>
+                    and
+                    <a
+                      href="/privacy"
+                      className="underline hover:text-green-600"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
+                  </FormLabel>
+                  <FormMessage className="text-sm text-red-500" />
+                </div>
+              </FormItem>
+            )}
+          />
+
           <Button
             type="submit"
-            className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 sm:h-14"
+            disabled={!registerForm.formState.isValid}
+            className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-400 sm:h-14"
           >
             Register
           </Button>
@@ -382,6 +452,7 @@ export default function RegisterForm() {
       <Button
         variant="outline"
         className="h-11 w-full rounded-md border-gray-300 text-base font-medium transition-colors duration-200 hover:bg-gray-50 sm:h-12 sm:text-lg"
+        onClick={handleGoogleLogin}
       >
         <GoogleIcon />
         Register with Google
@@ -406,5 +477,3 @@ export default function RegisterForm() {
     </div>
   );
 }
-
-("Update");

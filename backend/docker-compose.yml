@@ -38,6 +38,18 @@ services:
       - app_network 
     depends_on:
       - db # PgAdmin จะเริ่มหลังจาก DB พร้อม
+  
+  redis:
+    image: redis:7.0-alpine
+    container_name: review-app-redis
+    ports:
+      - "6379:6379" # Map port 6379 ของ Redis ไปยัง port 6379 ของ host
+    command: redis-server --appendonly yes # เปิดโหมด persistence เพื่อป้องกันข้อมูลหายเมื่อ restart
+    # volumes:
+    #   - redis_data:/data # เก็บข้อมูล redis ลงใน volume เพื่อให้ข้อมูลอยู่ถาวร
+    restart: unless-stopped
+    networks:
+      - app_network
 
 networks:
   app_network: # กำหนดชื่อ Network
@@ -46,3 +58,4 @@ networks:
 volumes:
   postgres_data: # Volume สำหรับข้อมูล PostgreSQL
   pgadmin_data:  # Volume สำหรับ Configuration ของ PgAdmin
+  redis_data:
