@@ -3,37 +3,74 @@ services:
     build: ./backend
     container_name: backend
     ports:
-      - "3001:3001" 
+      - "3001:3001"
     networks:
       - mern_network
-    # environment:
-    #   MONGO_URI: mongodb://mongo:27017/mydatabase  
-    # depends_on:
-    #   - mongodb
+    env_file:
+      - .env
+    environment:
+      EMAIL_USER: ${EMAIL_USER}
+      EMAIL_PASS: ${EMAIL_PASS}
+      FRONTEND_URL: http://localhost:3000
+      SESSION_SECRET: yoursecret
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      GOOGLE_CALLBACK_URL: http://localhost:3001/auth/google/callback
+      DATABASE_URL: postgres://admin:12345@db:5432/review_restaurant?schema=public
+      REDIS_URL: redis://redis:6379
+      PORT: 3001
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    command: sh -c "npx prisma migrate dev && npm start"
 
-  frontend:
-    build: ./frontend
-    container_name: frontend
-    ports:
-      - "3000:3000"  
-    networks:
-      - mern_network
-    # environment:
-    #   REACT_APP_API_URL: http://backend:3000
-
-  # mongodb:
-  #   image: mongo:latest  
+  # frontend:
+  #   build: ./frontend
+  #   container_name: frontend
   #   ports:
-  #     - "27017:27017"  
+  #     - "3000:3000"
   #   networks:
   #     - mern_network
-  #   volumes:
-  #     - mongo-data:/data/db  
+  # environment:
+  #   REACT_APP_API_URL: http://backend:3000
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: review-app-redis
+    ports:
+      - "6379:6379" # Map port 6379 ของ Redis ไปยัง port 6379 ของ host
+    command: redis-server --appendonly yes # เปิดโหมด persistence เพื่อป้องกันข้อมูลหายเมื่อ restart
+    # volumes:
+    #   - redis_data:/data # เก็บข้อมูล redis ลงใน volume เพื่อให้ข้อมูลอยู่ถาวร
+    restart: unless-stopped
+    networks:
+      - mern_network
+
+  db:
+    image: postgres:16.3-alpine
+    container_name: db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: 12345
+      POSTGRES_DB: review_restaurant
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # เก็บข้อมูล DB แบบถาวร
+    networks:
+      - mern_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d review_restaurant"] # ตรวจสอบว่า DB พร้อมรับ Connection
+      interval: 5s # ตรวจสอบทุก 5 วินาที
+      timeout: 5s # Timeout 5 วินาที
+      retries: 5 # ลอง 5 ครั้งก่อนประกาศว่าไม่ healthy
+      start_period: 10s # รอ 10 วินาทีแรกก่อนเริ่ม Health Check
 
 networks:
   mern_network:
-    driver: bridge 
-
-# volumes:
-#   mongo-data:
-#     driver: local  # Persist MongoDB data locally
+    driver: bridge
+volumes:
+  postgres_data:
+  redis_data:

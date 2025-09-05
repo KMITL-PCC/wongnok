@@ -4,7 +4,7 @@ import bcrypt from "bcrypt";
 import passport from "../../config/passport";
 import authServices from "./auth.services";
 import { logoutAllDevices } from "../../model/redis.model";
-import { User } from "../../../generated/prisma";
+import { User } from "@prisma/client";
 
 export default {
   //send otp to create user email
@@ -153,9 +153,8 @@ export default {
           return next(err);
         }
         if (!user) {
-          return res
-            .status(401)
-            .json({ message: info.message || "login failed" });
+          return res.status(401).json({ message: "login failed" });
+          console.log(info.message);
         }
 
         req.login(user, (err) => {
