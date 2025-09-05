@@ -5,7 +5,7 @@ import React, { useState, useEffect } from "react";
 // import { ArrowLeft, Home } from "lucide-react"; // Icons removed
 
 // NEW: Define the backend URL. In a real Next.js app, this would come from environment variables.
-const NEXT_PUBLIC_BACKEND_URL = "http://172.20.10.13:3001";
+const NEXT_PUBLIC_BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 const ForgotPasswordForm = () => {
   const [email, setEmail] = useState("");
@@ -41,6 +41,9 @@ const ForgotPasswordForm = () => {
       try {
         const response = await fetch(
           `${NEXT_PUBLIC_BACKEND_URL}/api/csrf-token`,
+          {
+            credentials: "include",
+          },
         );
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -87,7 +90,7 @@ const ForgotPasswordForm = () => {
 
     try {
       const response = await fetch(
-        `${NEXT_PUBLIC_BACKEND_URL}/auth/forgot-password`,
+        `${NEXT_PUBLIC_BACKEND_URL}/auth/forgotPass`,
         {
           method: "POST",
           credentials: "include",
@@ -144,7 +147,7 @@ const ForgotPasswordForm = () => {
             "Content-Type": "application/json",
             "CSRF-Token": csrfToken,
           },
-          body: JSON.stringify({ email, otp }),
+          body: JSON.stringify({ otp }),
         },
       );
 
@@ -188,13 +191,13 @@ const ForgotPasswordForm = () => {
       const response = await fetch(
         `${NEXT_PUBLIC_BACKEND_URL}/auth/reset-password`,
         {
-          method: "POST",
+          method: "PATCH",
           credentials: "include",
           headers: {
             "Content-Type": "application/json",
             "CSRF-Token": csrfToken,
           },
-          body: JSON.stringify({ email, password }),
+          body: JSON.stringify({ newPassword: password }),
         },
       );
 
