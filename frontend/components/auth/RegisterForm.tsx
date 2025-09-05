@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react"; // MODIFIED: Import useEffect
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation"; // ✅ 1. Import useRouter
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -16,6 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Google Icon Component (unchanged)
 const GoogleIcon = () => (
@@ -39,7 +41,6 @@ const GoogleIcon = () => (
   </svg>
 );
 
-// Schemas (unchanged)
 const registerFormSchema = z
   .object({
     username: z.string().min(2, {
@@ -54,11 +55,16 @@ const registerFormSchema = z
     confirmPassword: z.string().min(6, {
       message: "Confirm password must be at least 6 characters.",
     }),
+    terms: z.boolean().refine((val) => val === true, {
+      message: "You must accept the terms and conditions.",
+    }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
     path: ["confirmPassword"],
   });
+
+type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 const otpFormSchema = z.object({
   otp: z
@@ -72,11 +78,11 @@ const otpFormSchema = z.object({
 });
 
 export default function RegisterForm() {
+  const router = useRouter(); // ✅ 2. ประกาศใช้งาน router
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
-  const [csrfToken, setCsrfToken] = useState<string | null>(null); // NEW: State for CSRF token
+  const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
-  // NEW: Fetch CSRF token when the component mounts
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -86,7 +92,7 @@ export default function RegisterForm() {
         });
         if (response.ok) {
           const data = await response.json();
-          setCsrfToken(data.csrfToken); // Assumes backend sends { csrfToken: '...' }
+          setCsrfToken(data.csrfToken);
           console.log("CSRF Token fetched successfully.");
         } else {
           console.error("Failed to fetch CSRF token");
@@ -101,19 +107,19 @@ export default function RegisterForm() {
         });
       }
     };
-
     fetchCsrfToken();
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, []);
 
-  // Form initializations (unchanged)
-  const registerForm = useForm<z.infer<typeof registerFormSchema>>({
+  const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
       username: "",
       email: "",
       password: "",
       confirmPassword: "",
+      terms: false,
     },
+    mode: "onChange",
   });
 
   const otpForm = useForm<z.infer<typeof otpFormSchema>>({
@@ -123,8 +129,7 @@ export default function RegisterForm() {
     },
   });
 
-  // MODIFIED: Function to handle registration form submission
-  async function onRegisterSubmit(values: z.infer<typeof registerFormSchema>) {
+  async function onRegisterSubmit(values: RegisterFormValues) {
     if (!csrfToken) {
       toast.error("Security Error", {
         description: "Cannot submit form. Secure token is missing.",
@@ -139,12 +144,11 @@ export default function RegisterForm() {
 
     try {
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-      // const response = await fetch(`${backendURL}/test`, {
       const response = await fetch(`${backendURL}/auth/register/send-otp`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
+          "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
           username: values.username,
@@ -176,7 +180,7 @@ export default function RegisterForm() {
     }
   }
 
-  // MODIFIED: Function to handle OTP form submission
+  // ✅ 3. แก้ไขฟังก์ชัน onOtpSubmit ทั้งหมด
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
     if (!csrfToken) {
       toast.error("Security Error", {
@@ -196,7 +200,7 @@ export default function RegisterForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "CSRF-Token": csrfToken, // MODIFIED: Include CSRF token in headers
+          "CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
           email: registrationEmail,
@@ -206,14 +210,17 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
-        const data = await response.json();
-        console.log("OTP verification successful:", data);
+        console.log("OTP verification successful");
+
         toast.success("Account Verified!", {
           description:
-            "Your account has been successfully verified. You can now log in.",
+            "Your account is verified. Redirecting to the homepage...",
         });
-        // Redirect to login page upon successful verification
-        // window.location.href = "/login";
+
+        // หน่วงเวลา 2 วินาทีเพื่อให้ผู้ใช้อ่านข้อความ แล้วค่อย redirect
+        setTimeout(() => {
+          router.push("/"); // พาไปยังหน้าหลัก
+        }, 2000);
       } else {
         const errorData = await response.json();
         console.error("OTP verification failed:", errorData);
@@ -230,7 +237,6 @@ export default function RegisterForm() {
     }
   }
 
-  // Other functions (unchanged)
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
@@ -242,7 +248,6 @@ export default function RegisterForm() {
     window.location.href = `${backendURL}/auth/google`;
   };
 
-  // JSX for OTP and Register forms (unchanged)
   const OtpVerificationForm = () => (
     <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -282,7 +287,7 @@ export default function RegisterForm() {
                 </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter 6-digit code"
+                    placeholder="Enter 5-digit code"
                     {...field}
                     className="h-11 rounded-md border-gray-300 text-center text-base tracking-widest focus:border-green-500 focus:ring-green-500 sm:h-12"
                   />
@@ -395,9 +400,43 @@ export default function RegisterForm() {
             )}
           />
 
+          <FormField
+            control={registerForm.control}
+            name="terms"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md py-4">
+                <FormControl>
+                  <Checkbox
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+                <div className="space-y-1 leading-none">
+                  {/* MODIFIED: Added whitespace-nowrap */}
+                  <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
+                    I agree to the {""}
+                    <a href="/terms" className="underline hover:text-green-600">
+                      Terms of Service
+                    </a>
+                    and
+                    <a
+                      href="/privacy"
+                      className="underline hover:text-green-600"
+                    >
+                      Privacy Policy
+                    </a>
+                    .
+                  </FormLabel>
+                  <FormMessage className="text-sm text-red-500" />
+                </div>
+              </FormItem>
+            )}
+          />
+
           <Button
             type="submit"
-            className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 sm:h-14"
+            disabled={!registerForm.formState.isValid}
+            className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-400 sm:h-14"
           >
             Register
           </Button>
