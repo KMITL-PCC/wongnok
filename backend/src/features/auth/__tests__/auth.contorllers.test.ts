@@ -148,6 +148,22 @@ describe("Auth Services", () => {
       });
     });
 
+    it("should return error if doesn't have session register otp", async () => {
+      req.session = { registerData: {} };
+      req.body = {
+        otp: "12345",
+      };
+
+      const result = await authControllers.registerStep2_verifyOTPandCreateUser(
+        req,
+        res
+      );
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith({
+        message: "No pending registration. Please start registration again.",
+      });
+    });
+
     it("should return Invalid OTP if doesn't have OTP", async () => {
       req.body = {};
       req.session = {

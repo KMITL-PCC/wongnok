@@ -103,7 +103,7 @@ export default {
     } = session.registerData;
 
     if (new Date() > new Date(storedExpiresAt)) {
-      delete session.registrationData;
+      delete session.registerData;
       return res
         .status(401)
         .json({ message: "OTP has expired. Please request a new one." });
