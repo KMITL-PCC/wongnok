@@ -36,7 +36,6 @@ const ForgotPasswordForm = () => {
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
-        // FIXED: Using the backendURL constant
         const response = await fetch(`${backendURL}/api/csrf-token`, {
           credentials: "include",
         });
@@ -84,8 +83,7 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      // FIXED: Using the backendURL constant
-      const response = await fetch(`${backendURL}/auth/forgot-password`, {
+      const response = await fetch(`${backendURL}/auth/forgotPass`, {
         method: "POST",
         credentials: "include",
         headers: {
@@ -131,7 +129,6 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      // FIXED: Using the backendURL constant
       const response = await fetch(`${backendURL}/auth/verify-otp`, {
         method: "POST",
         credentials: "include",
@@ -179,15 +176,14 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      // FIXED: Using the backendURL constant
       const response = await fetch(`${backendURL}/auth/reset-password`, {
-        method: "POST",
+        method: "PATCH",
         credentials: "include",
         headers: {
           "Content-Type": "application/json",
           "CSRF-Token": csrfToken,
         },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ email, newPassword: password }),
       });
 
       const data = await response.json();
@@ -227,7 +223,6 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      // FIXED: Using the backendURL constant
       const response = await fetch(`${backendURL}/auth/resend-otp`, {
         method: "POST",
         credentials: "include",
