@@ -136,7 +136,7 @@ const ForgotPasswordForm = () => {
           "Content-Type": "application/json",
           "CSRF-Token": csrfToken,
         },
-        body: JSON.stringify({ email, otp }),
+        body: JSON.stringify({ otp }),
       });
 
       const data = await response.json();
@@ -183,7 +183,7 @@ const ForgotPasswordForm = () => {
           "Content-Type": "application/json",
           "CSRF-Token": csrfToken,
         },
-        body: JSON.stringify({ email, newPassword: password }),
+        body: JSON.stringify({ newPassword: password }),
       });
 
       const data = await response.json();

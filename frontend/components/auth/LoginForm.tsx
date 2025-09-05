@@ -121,7 +121,11 @@ export default function LoginForm() {
           "Content-Type": "application/json",
           "X-CSRF-Token": csrfToken, // Add CSRF token to headers
         },
-        body: JSON.stringify(values),
+        // body: JSON.stringify(values),
+        body: JSON.stringify({
+          loginform: values.username,
+          password: values.password,
+        }),
         credentials: "include", // Important: include cookies in the request
       });
 

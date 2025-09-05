@@ -26,8 +26,8 @@ router.post(
 
 router.post(
   "/login",
-  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
-  isLogedIn,
+  // rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
+  // isLogedIn,
   authControllers.login
 );
 
