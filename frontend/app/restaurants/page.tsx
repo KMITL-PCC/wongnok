@@ -19,8 +19,8 @@ const RestaurantsPage = async () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex gap-2">
-                <RecommendFilterButton />
-                <RecommendFilterButton />
+                <RecommendFilterButton filter="popular" />
+                <RecommendFilterButton filter="new" />
               </CardTitle>
             </CardHeader>
             <Separator />
