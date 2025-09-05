@@ -49,6 +49,7 @@ router.post(
   authControllers.resendOTP
 );
 
+router.patch("/reset-password", authControllers.updatePass);
 router.patch("/updatepass", isAuthenticated, authControllers.updatePass);
 
 //google

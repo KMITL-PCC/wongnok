@@ -375,6 +375,8 @@ export default {
       });
     }
 
+    console.log("Session from forgot", session);
+
     const { email } = session.forgotData || session.userdata;
 
     if (!email) {
