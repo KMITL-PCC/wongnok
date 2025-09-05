@@ -3,6 +3,7 @@ import { Toaster } from "@/components/ui/sonner";
 
 import Header from "@/components/header/Header";
 import "./globals.css";
+import Footer from "@/components/footer/Footer";
 
 export const metadata: Metadata = {
   title: "TasteTrail",
@@ -18,9 +19,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body>
+      <body className="flex flex-col w-full min-h-svh">
         <Header />
-        {children}
+        <main className="flex-1">{children}</main>
+        <Footer />
         <Toaster />
       </body>
     </html>

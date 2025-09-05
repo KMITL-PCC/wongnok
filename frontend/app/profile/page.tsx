@@ -1,4 +1,4 @@
 const ProfilePage = () => {
-  return <div>Kuy PM</div>;
+  return <div>This is Profile Page</div>;
 };
 export default ProfilePage;
