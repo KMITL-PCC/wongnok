@@ -5,7 +5,7 @@ import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestauran
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-const RestaurantsPage = () => {
+const RestaurantsPage = async () => {
   return (
     <div className="flex flex-col gap-4 p-4 md:p md:flex-row">
       {/* Filter */}
