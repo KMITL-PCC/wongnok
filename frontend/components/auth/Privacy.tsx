@@ -113,9 +113,9 @@ export default function PrivacyPolicyPage() {
             7. Children's Privacy
           </h2>
           <p>
-            Our Service does not address anyone under the age of 13
+            Our Service does not address anyone under the age of 12
             ("Children"). We do not knowingly collect personally identifiable
-            information from anyone under the age of 13.
+            information from anyone under the age of 12.
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">
