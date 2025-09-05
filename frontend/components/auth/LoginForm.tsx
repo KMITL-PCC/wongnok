@@ -155,10 +155,10 @@ export default function LoginForm() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white p-10 md:p-10">
+    <div className="flex min-h-60 flex-col bg-white p-10 md:p-10">
       {/* Back button has been removed */}
 
-      <div className="flex flex-grow items-center justify-center">
+      <div className="items-top flex flex-grow justify-center">
         <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
             <h1 className="text-4xl font-bold text-black">Welcome</h1>

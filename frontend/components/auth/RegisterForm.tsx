@@ -78,7 +78,7 @@ const otpFormSchema = z.object({
 });
 
 export default function RegisterForm() {
-  const router = useRouter(); // ✅ 2. ประกาศใช้งาน router
+  const router = useRouter();
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
@@ -308,163 +308,173 @@ export default function RegisterForm() {
   );
 
   const RegisterMainForm = () => (
-    <div className="w-full max-w-sm space-y-6 pt-14">
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
-          Create Account
-        </h1>
-      </div>
+    <div className="flex min-h-screen flex-col bg-white p-10 md:p-10">
+      <div className="flex flex-grow items-start justify-center">
+        <div className="w-full max-w-sm space-y-8">
+          <div className="text-center">
+            <h1 className="text-3xl font-bold text-gray-900 sm:text-4xl">
+              Create Account
+            </h1>
+          </div>
 
-      <Form {...registerForm}>
-        <form
-          onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
-          className="space-y-4"
-        >
-          <FormField
-            control={registerForm.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Username
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Choose a username"
-                    {...field}
-                    className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-500" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={registerForm.control}
-            name="email"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Email
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="email"
-                    placeholder="Enter your email"
-                    {...field}
-                    className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-500" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={registerForm.control}
-            name="password"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Password
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Create a password"
-                    {...field}
-                    className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-500" />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={registerForm.control}
-            name="confirmPassword"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  Confirm Password
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    type="password"
-                    placeholder="Confirm your password"
-                    {...field}
-                    className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-500" />
-              </FormItem>
-            )}
-          />
+          <Form {...registerForm}>
+            <form
+              onSubmit={registerForm.handleSubmit(onRegisterSubmit)}
+              className="space-y-4"
+            >
+              <FormField
+                control={registerForm.control}
+                name="username"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium text-gray-700">
+                      Username
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Choose a username"
+                        {...field}
+                        className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm text-red-500" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium text-gray-700">
+                      Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="Enter your email"
+                        {...field}
+                        className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm text-red-500" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="password"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium text-gray-700">
+                      Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Create a password"
+                        {...field}
+                        className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm text-red-500" />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={registerForm.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="font-medium text-gray-700">
+                      Confirm Password
+                    </FormLabel>
+                    <FormControl>
+                      <Input
+                        type="password"
+                        placeholder="Confirm your password"
+                        {...field}
+                        className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                      />
+                    </FormControl>
+                    <FormMessage className="text-sm text-red-500" />
+                  </FormItem>
+                )}
+              />
 
-          <FormField
-            control={registerForm.control}
-            name="terms"
-            render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md py-4">
-                <FormControl>
-                  <Checkbox
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                  />
-                </FormControl>
-                <div className="space-y-1 leading-none">
-                  {/* MODIFIED: Added whitespace-nowrap */}
-                  <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
-                    I agree to the {""}
-                    <a href="/terms" className="underline hover:text-green-600">
-                      Terms of Service
-                    </a>
-                    and
-                    <a
-                      href="/privacy"
-                      className="underline hover:text-green-600"
-                    >
-                      Privacy Policy
-                    </a>
-                    .
-                  </FormLabel>
-                  <FormMessage className="text-sm text-red-500" />
-                </div>
-              </FormItem>
-            )}
-          />
+              <FormField
+                control={registerForm.control}
+                name="terms"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-start space-y-0 space-x-3 rounded-md py-4">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                    <div className="space-y-1 leading-none">
+                      {/* MODIFIED: Added whitespace-nowrap */}
+                      <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
+                        I agree to the {""}
+                        <a
+                          href="/terms"
+                          className="underline hover:text-green-600"
+                        >
+                          Terms of Service
+                        </a>
+                        and
+                        <a
+                          href="/privacy"
+                          className="underline hover:text-green-600"
+                        >
+                          Privacy Policy
+                        </a>
+                        .
+                      </FormLabel>
+                      <FormMessage className="text-sm text-red-500" />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <Button
+                type="submit"
+                disabled={!registerForm.formState.isValid}
+                className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-400 sm:h-14"
+              >
+                Register
+              </Button>
+            </form>
+          </Form>
+
+          <div className="mt-6 flex items-center space-x-3">
+            <hr className="flex-grow border-gray-300" />
+            <span className="text-sm text-gray-500">or</span>
+            <hr className="flex-grow border-gray-300" />
+          </div>
 
           <Button
-            type="submit"
-            disabled={!registerForm.formState.isValid}
-            className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 disabled:cursor-not-allowed disabled:bg-gray-400 sm:h-14"
+            variant="outline"
+            className="h-11 w-full rounded-md border-gray-300 text-base font-medium transition-colors duration-200 hover:bg-gray-50 sm:h-12 sm:text-lg"
+            onClick={handleGoogleLogin}
           >
-            Register
+            <GoogleIcon />
+            Register with Google
           </Button>
-        </form>
-      </Form>
 
-      <div className="mt-6 flex items-center space-x-3">
-        <hr className="flex-grow border-gray-300" />
-        <span className="text-sm text-gray-500">or</span>
-        <hr className="flex-grow border-gray-300" />
-      </div>
-
-      <Button
-        variant="outline"
-        className="h-11 w-full rounded-md border-gray-300 text-base font-medium transition-colors duration-200 hover:bg-gray-50 sm:h-12 sm:text-lg"
-        onClick={handleGoogleLogin}
-      >
-        <GoogleIcon />
-        Register with Google
-      </Button>
-
-      <div className="mt-4 text-center text-sm">
-        <p className="text-gray-600">
-          Already have an account?{" "}
-          <a href="#" className="font-semibold text-green-600 hover:underline">
-            Login
-          </a>
-        </p>
+          <div className="mt-4 text-center text-sm">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <a
+                href="#"
+                className="font-semibold text-green-600 hover:underline"
+              >
+                Login
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );
