@@ -1,4 +1,5 @@
 import Image from "next/image";
+
 import {
   Card,
   CardContent,
@@ -6,12 +7,13 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { cn } from "@/lib/utils";
 
-const SecondaryRestaurantCard = () => {
+const SecondaryRestaurantCard = ({ className }: { className?: string }) => {
   return (
-    <Card className="gap-2 p-0 pb-2">
+    <Card className={cn("gap-2 pt-0", className)}>
       <CardHeader className="flex flex-col gap-2 p-0">
-        <div className="relative w-full h-40">
+        <div className="relative w-full h-30 md:h-40">
           <Image
             src="/food1.png"
             alt="Pad Thai"
@@ -19,12 +21,10 @@ const SecondaryRestaurantCard = () => {
             className="object-cover rounded-t-lg"
           />
         </div>
-        <CardTitle className="px-2 md:px-4">ผัดไทย</CardTitle>
-        <CardDescription className="px-2 md:px-4">
-          ผัดไทยออนไลน์
-        </CardDescription>
+        <CardTitle className="px-6">ผัดไทย</CardTitle>
+        <CardDescription className="px-6">ผัดไทยออนไลน์</CardDescription>
       </CardHeader>
-      <CardContent className="flex gap-2 px-2 text-sm md:px-4">
+      <CardContent className="flex gap-2 px-6 text-sm">
         <p>Star</p>
         <p>Review</p>
       </CardContent>

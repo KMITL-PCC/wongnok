@@ -19,7 +19,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="flex flex-col w-full overflow-hidden min-h-svh">
+      <body className="flex flex-col w-full min-h-svh">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />

@@ -1,31 +1,22 @@
 import Link from "next/link";
-
-import { Logo } from "./Logo";
+import Logo from "../Logo";
 
 const links = [
   {
-    title: "Features",
-    href: "#",
+    title: "Restaurants",
+    href: "/restaurants",
   },
   {
-    title: "Solution",
-    href: "#",
+    title: "Terms",
+    href: "/terms",
   },
   {
-    title: "Customers",
-    href: "#",
+    title: "Privacy",
+    href: "/privacy",
   },
   {
-    title: "Pricing",
-    href: "#",
-  },
-  {
-    title: "Help",
-    href: "#",
-  },
-  {
-    title: "About",
-    href: "#",
+    title: "Contact",
+    href: "/contact",
   },
 ];
 
@@ -35,11 +26,9 @@ export default function Footer() {
       <div className="max-w-5xl px-6 mx-auto">
         <div className="flex flex-wrap items-center justify-center gap-12 lg:justify-between">
           <div className="flex items-center order-last gap-3 md:order-first">
-            <Link href="#" aria-label="go home">
-              <Logo />
-            </Link>
+            <Logo width={50} height={50} />
             <span className="block text-sm text-center text-muted-foreground">
-              © {new Date().getFullYear()} Tailark Mist, All rights reserved
+              © {new Date().getFullYear()} TasteTrail, All rights reserved
             </span>
           </div>
 

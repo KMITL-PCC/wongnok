@@ -1,4 +1,5 @@
 import FilterRestaurant from "@/components/restaurants/FilterRestaurant";
+import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCard.tsx";
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
 
@@ -24,10 +25,11 @@ const RestaurantsPage = async () => {
               </CardTitle>
             </CardHeader>
             <Separator />
-            <CardContent className="grid grid-cols-3 gap-4">
+            <CardContent className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
               <SecondaryRestaurantCard />
               <SecondaryRestaurantCard />
-              <SecondaryRestaurantCard />
+              <SecondaryRestaurantCard className="hidden md:flex" />
+              <SecondaryRestaurantCard className="hidden lg:flex" />
             </CardContent>
           </Card>
         </div>
@@ -52,8 +54,10 @@ const RestaurantsPage = async () => {
               <CardTitle>Restaurants</CardTitle>
             </CardHeader>
             <Separator />
-            <CardContent>
-              <p>Card Content</p>
+            <CardContent className="grid gap-4">
+              <PrimaryRestaurantCard />
+              <PrimaryRestaurantCard />
+              <PrimaryRestaurantCard />
             </CardContent>
           </Card>
         </div>

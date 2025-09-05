@@ -11,22 +11,21 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import Image from "next/image";
-import logo from "@/public/logo.svg";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Logo from "../Logo";
 
 const getUserInfo = async () => {
   try {
-    const res = await fetch("http://localhost:3001/auth/me", {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/me`, {
       credentials: "include",
     });
 
     if (!res.ok) {
-      console.log("User not authenticated, status:", res.status);
       return null;
     }
+
     const data = await res.json();
     return data;
   } catch (error) {
@@ -37,15 +36,9 @@ const getUserInfo = async () => {
 
 const userLogout = async () => {
   try {
-    await fetch("http://localhost:3001/auth/logout", {
+    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
       credentials: "include",
     });
-
-    // if (!res.ok) {
-    //   console.log("User not authenticated, status:", res.status);
-    //   return null;
-    // }
-    console.log("User logged out");
   } catch (error) {
     console.error("Error fetching user info:", error);
     return null;
@@ -60,7 +53,6 @@ const Header = () => {
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userInfo = await getUserInfo();
-      console.log(userInfo);
       setUserInfo(userInfo);
     };
     fetchUserInfo();
@@ -69,18 +61,7 @@ const Header = () => {
   return (
     <header className="sticky top-0 z-50 w-full border bg-background">
       <div className="flex items-center justify-between gap-8 px-8 py-4 mx-auto md:px-14">
-        <Link href="/" className="flex items-center gap-2">
-          <Image
-            src={logo}
-            alt="TasteTrail"
-            width={50}
-            height={50}
-            className="rounded-full"
-          />
-          <span className="hidden text-xl font-semibold md:block">
-            TasteTrail
-          </span>
-        </Link>
+        <Logo width={50} height={50} />
 
         {/* Search */}
         <form className="relative flex-1 max-w-xl">
