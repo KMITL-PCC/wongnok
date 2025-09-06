@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 
 // The backend URL is correctly defined here and will be used throughout the component.
 const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -22,7 +23,7 @@ const ForgotPasswordForm = () => {
 
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
-  // This effect will hide the message after 3 seconds
+  // Hide message after 3s
   useEffect(() => {
     if (message) {
       const timer = setTimeout(() => {
@@ -32,7 +33,7 @@ const ForgotPasswordForm = () => {
     }
   }, [message]);
 
-  // This effect fetches the CSRF token when the component mounts.
+  // Fetch CSRF token on mount
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -52,9 +53,9 @@ const ForgotPasswordForm = () => {
       }
     };
     fetchCsrfToken();
-  }, []); // The dependency array is empty, so this runs once on mount
+  }, []);
 
-  // This effect handles the countdown timer
+  // Countdown
   useEffect(() => {
     let timer: NodeJS.Timeout;
     if (countdown > 0) {
@@ -63,7 +64,7 @@ const ForgotPasswordForm = () => {
     return () => clearTimeout(timer);
   }, [countdown]);
 
-  // Handles the initial email submission with real API call
+  // Submit email
   const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -110,7 +111,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // Handles the OTP submission with real API call
+  // Submit OTP
   const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -155,7 +156,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // Handles the final password reset submission with real API call
+  // Submit new password
   const handlePasswordSubmit = async (
     event: React.FormEvent<HTMLFormElement>,
   ) => {
@@ -209,7 +210,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // Handles the resend OTP request with real API call
+  // Resend OTP
   const handleResendOtp = async () => {
     if (countdown > 0) return;
 
@@ -249,7 +250,7 @@ const ForgotPasswordForm = () => {
     }
   };
 
-  // Function to go back to the email input form
+  // Back to email step
   const handleBackToEmail = () => {
     setFormStep("email");
     setMessage("");
@@ -267,7 +268,7 @@ const ForgotPasswordForm = () => {
         </div>
       )}
 
-      {/* Renders the Email Form */}
+      {/* Email Form */}
       {formStep === "email" && (
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
@@ -303,11 +304,21 @@ const ForgotPasswordForm = () => {
             >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </button>
+
+            {/* Text link back to Login */}
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+              >
+                ← Back to Login
+              </Link>
+            </div>
           </form>
         </div>
       )}
 
-      {/* Renders the OTP Form */}
+      {/* OTP Form */}
       {formStep === "otp" && (
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
@@ -345,7 +356,18 @@ const ForgotPasswordForm = () => {
             >
               {isLoading ? "Verifying..." : "Verify Code"}
             </button>
+
+            {/* Text link back to Login */}
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+              >
+                ← Back to Login
+              </Link>
+            </div>
           </form>
+
           <div className="mt-6 space-y-4 text-sm text-center">
             <p className="text-gray-600">
               Didn't receive the code?{" "}
@@ -374,7 +396,7 @@ const ForgotPasswordForm = () => {
         </div>
       )}
 
-      {/* Renders the Reset Password Form */}
+      {/* Reset Password Form */}
       {formStep === "resetPassword" && (
         <div className="w-full max-w-md">
           <div className="mb-6 text-center">
@@ -425,6 +447,16 @@ const ForgotPasswordForm = () => {
             >
               {isLoading ? "Saving..." : "Reset Password"}
             </button>
+
+            {/* Text link back to Login */}
+            <div className="text-center">
+              <Link
+                href="/login"
+                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+              >
+                ← Back to Login
+              </Link>
+            </div>
           </form>
         </div>
       )}
