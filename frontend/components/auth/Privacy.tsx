@@ -35,8 +35,8 @@ export default function PrivacyPolicyPage() {
             <li>
               <strong>Usage Data:</strong> We may collect information on how the
               Service is accessed and used. This may include information such as
-              your computer's IP address, browser type, browser version, the
-              pages of our Service that you visit, the time and date of your
+              your computer&apos;s IP address, browser type, browser version,
+              the pages of our Service that you visit, the time and date of your
               visit, and other diagnostic data.
             </li>
             <li>
@@ -104,18 +104,18 @@ export default function PrivacyPolicyPage() {
           </h2>
           <p>
             We may employ third-party companies and individuals to facilitate
-            our Service ("Service Providers"), to provide the Service on our
-            behalf, to perform Service-related services or to assist us in
-            analyzing how our Service is used.
+            our Service (&quot;Service Providers&quot;), to provide the Service
+            on our behalf, to perform Service-related services or to assist us
+            in analyzing how our Service is used.
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">
-            7. Children's Privacy
+            7. Children&apos;s Privacy
           </h2>
           <p>
             Our Service does not address anyone under the age of 12
-            ("Children"). We do not knowingly collect personally identifiable
-            information from anyone under the age of 12.
+            (&quot;Children&quot;). We do not knowingly collect personally
+            identifiable information from anyone under the age of 12.
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">

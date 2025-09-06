@@ -2,13 +2,16 @@ import FilterRestaurant from "@/components/restaurants/FilterRestaurant";
 import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCard.tsx";
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
+import Link from "next/link";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
+import restaurantData from "@/mockdata/restaurant.json";
+
 const RestaurantsPage = async () => {
   return (
-    <div className="flex flex-col gap-4 p-4 md:p md:flex-row">
+    <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
       {/* Filter */}
       <div>
         <FilterRestaurant />
@@ -25,11 +28,27 @@ const RestaurantsPage = async () => {
               </CardTitle>
             </CardHeader>
             <Separator />
-            <CardContent className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-              <SecondaryRestaurantCard />
-              <SecondaryRestaurantCard />
-              <SecondaryRestaurantCard className="hidden md:flex" />
-              <SecondaryRestaurantCard className="hidden lg:flex" />
+            <CardContent className="grid grid-cols-3 gap-4">
+              {/* <Link href="/restaurants/1">
+                <SecondaryRestaurantCard />
+              </Link>
+              <Link href="/restaurants/2">
+                <SecondaryRestaurantCard />
+              </Link>
+              <Link href="/restaurants/3">
+                <SecondaryRestaurantCard className="hidden md:flex" />
+              </Link>
+              <Link href="/restaurants/4">
+                <SecondaryRestaurantCard className="hidden lg:flex" />
+              </Link> */}
+              {restaurantData.slice(0, 3).map((restaurant) => (
+                <Link
+                  href={`/restaurants/${restaurant.id}`}
+                  key={restaurant.id}
+                >
+                  <SecondaryRestaurantCard restaurant={restaurant} />
+                </Link>
+              ))}
             </CardContent>
           </Card>
         </div>
@@ -55,9 +74,17 @@ const RestaurantsPage = async () => {
             </CardHeader>
             <Separator />
             <CardContent className="grid gap-4">
+              {/* <PrimaryRestaurantCard />
               <PrimaryRestaurantCard />
-              <PrimaryRestaurantCard />
-              <PrimaryRestaurantCard />
+              <PrimaryRestaurantCard /> */}
+              {restaurantData.map((restaurant) => (
+                <Link
+                  href={`/restaurants/${restaurant.id}`}
+                  key={restaurant.id}
+                >
+                  <PrimaryRestaurantCard restaurant={restaurant} />
+                </Link>
+              ))}
             </CardContent>
           </Card>
         </div>
