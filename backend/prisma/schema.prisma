@@ -56,9 +56,12 @@ model Restaurant {
   // DECIMAL(10, 8) -> Decimal ใน Prisma
   latitude      Decimal
   longitude     Decimal
-  status        RestaurantStatus @default(Open)
+  status        RestaurantStatus @default(Temporarily_Closed)
+  minPrice      Decimal   @map("min_price") @db.Decimal(5, 2)
+  maxPrice      Decimal   @map("max_price") @db.Decimal(5, 2)
   avgRating     Decimal   @map("avg_rating") @default(0.0) @db.Decimal(3, 2)
   totalReviews  Int       @map("total_reviews") @default(0)
+
   createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -69,6 +72,7 @@ model Restaurant {
   categories    RestaurantCategory[]
   reviews       Review[]
   openninghour  OpeningHour[]
+  restaurantServices RestaurantService[]
 }
 
 enum RestaurantStatus {
@@ -84,6 +88,24 @@ model OpeningHour {
   openTime      String
   closeTime     String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id])
+}
+
+model Service {
+  id            Int     @id @default(autoincrement())
+  service       String  @db.VarChar(50)
+
+  restaurantServices RestaurantService[]
+}
+
+model RestaurantService {
+  restaurantId  String @map("restaurant_id")
+  serviceId     Int
+
+  restaurant  Restaurant @relation(fields: [restaurantId], references: [id])
+  service     Service @relation(fields: [serviceId], references: [id])
+
+  @@id([restaurantId, serviceId])
+  @@map("RestaurantService")
 }
 
 // --- Table: RestaurantImages ---

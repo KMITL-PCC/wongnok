@@ -7,11 +7,11 @@ RUN npm install
 
 COPY . .
 
-# รัน build TypeScript
-RUN npm run build
-
 # รัน prisma generate หลังจาก install เสร็จ
 RUN npx prisma generate
+
+# รัน build TypeScript
+RUN npm run build
 
 # --- Stage 2: Production Stage ---
 FROM node:20-alpine
