@@ -13,6 +13,7 @@ import otpGenerator from "otp-generator";
 import redisConfig from "./src/config/redis.config";
 import authen from "./src/features/auth/auth.routes";
 import { invalidCsrf } from "./src/middleware/auth.middleware";
+import restaurant from "./src/features/restaurant/restaurant.routes";
 
 dotenv.config();
 
@@ -68,15 +69,10 @@ app.use(passport.session());
 
 app.use(invalidCsrf);
 app.use("/auth", authen);
+app.use("/restaurant", restaurant);
 
 app.get("/api/csrf-token", (req, res) => {
   res.json({ csrfToken: req.csrfToken() });
-});
-
-app.post("/test", (req, res) => {
-  console.log("Incoming CSRF token:", req.headers["x-csrf-token"]);
-  console.log("Session:", req.session);
-  res.send("ok");
 });
 
 app.get("/", (req, res) => {
