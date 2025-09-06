@@ -40,20 +40,26 @@ const GoogleIcon = () => (
 );
 
 const formSchema = z.object({
-  username: z.string().min(2, {
-    message: "Username must be at least 2 characters.",
-  }),
-  password: z.string().min(6, {
-    message: "Password must be at least 6 characters.",
-  }),
+  username: z
+    .string()
+    .min(2, { message: "Username must be at least 2 characters." }),
+  password: z
+    .string()
+    .min(6, { message: "Password must be at least 6 characters." }),
 });
 
 export default function LoginForm() {
   const router = useRouter();
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
-  // 1. Fetch CSRF token when the component mounts
+  // Prefetch หน้าแรกให้ไวขึ้น
+  useEffect(() => {
+    router.prefetch("/");
+  }, [router]);
+
+  // 1) ดึง CSRF token
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -63,7 +69,7 @@ export default function LoginForm() {
 
         if (response.ok) {
           const data = await response.json();
-          setCsrfToken(data.csrfToken); // Store the token in state
+          setCsrfToken(data.csrfToken);
           console.log("CSRF Token obtained.");
         } else {
           toast.error("Security token error", {
@@ -77,18 +83,15 @@ export default function LoginForm() {
         });
       }
     };
-    fetchCsrfToken();
-  }, [backendURL]); // Rerun if backendURL changes
+    if (backendURL) fetchCsrfToken();
+  }, [backendURL]);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      username: "",
-      password: "",
-    },
+    defaultValues: { username: "", password: "" },
   });
 
-  // 3. Action for Google login button
+  // Google login
   const handleGoogleLogin = () => {
     if (backendURL) {
       window.location.href = `${backendURL}/auth/google`;
@@ -100,7 +103,12 @@ export default function LoginForm() {
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // Ensure CSRF token is available before submitting
+    if (!backendURL) {
+      toast.error("Configuration Error", {
+        description: "Backend URL is missing.",
+      });
+      return;
+    }
     if (!csrfToken) {
       toast.error("Session not ready", {
         description: "Please wait a moment and try again.",
@@ -108,37 +116,36 @@ export default function LoginForm() {
       return;
     }
 
+    setIsSubmitting(true);
     toast.info("Verifying data...", {
       description: `Username: ${values.username}`,
       duration: 2000,
     });
 
     try {
-      // 2. Fetch from the correct login endpoint with credentials and CSRF token
       const response = await fetch(`${backendURL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "X-CSRF-Token": csrfToken, // Add CSRF token to headers
+          "X-CSRF-Token": csrfToken,
         },
-        // body: JSON.stringify(values),
         body: JSON.stringify({
           loginform: values.username,
           password: values.password,
         }),
-        credentials: "include", // Important: include cookies in the request
+        credentials: "include",
       });
 
       if (response.ok) {
         const data = await response.json();
         console.log("Login successful:", data);
-        toast.success("Login Successful!", {
-          description: "Welcome back!",
-        });
-        // Optionally redirect user after successful login
-        // router.push('/dashboard');
+        toast.success("Login Successful!", { description: "Welcome back!" });
+
+        // ⬇️ กลับหน้าหลักทันที และล้างหน้า login จาก history
+        router.replace("/");
+        // ถ้าโฮมเพจอ่าน session ฝั่งเซิร์ฟเวอร์อยู่แล้ว จะโหลดสถานะใหม่ให้เอง
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         console.error("Login failed:", errorData);
         toast.error("Login Failed", {
           description:
@@ -151,13 +158,13 @@ export default function LoginForm() {
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <div className="flex min-h-60 flex-col bg-white p-10 md:p-10">
-      {/* Back button has been removed */}
-
       <div className="items-top flex flex-grow justify-center">
         <div className="w-full max-w-sm space-y-6">
           <div className="text-center">
@@ -165,7 +172,7 @@ export default function LoginForm() {
             <p className="text-green-600">to your account</p>
           </div>
 
-          {/* Google Login button with onClick handler */}
+          {/* Google Login */}
           <Button
             variant="outline"
             className="h-12 w-full text-base"
@@ -220,16 +227,18 @@ export default function LoginForm() {
                 )}
               />
 
+              {/* ปุ่ม Submit — ไม่ครอบด้วย <Link> */}
               <Button
                 type="submit"
-                className="h-12 w-full bg-green-500 text-lg font-semibold text-white hover:bg-green-500"
+                className="h-12 w-full bg-green-500 text-lg font-semibold text-white hover:bg-green-600"
+                disabled={!csrfToken || isSubmitting}
+                aria-busy={isSubmitting}
               >
-                Login
+                {isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
 
-          {/* Links for Register and Forgot Password */}
           <div className="flex justify-between text-sm">
             <Link
               href="/register"
@@ -245,20 +254,13 @@ export default function LoginForm() {
             </Link>
           </div>
 
-          {/* Added Terms of Service and Privacy Policy text */}
           <p className="text-center text-xs text-gray-500">
-            By continuing, you agree to Supabase's{" "}
-            <a
-              href="/terms" // Replace with your actual Terms of Service URL
-              className="underline hover:text-black"
-            >
+            By continuing, you agree to Supabase&apos;s{" "}
+            <a href="/terms" className="underline hover:text-black">
               Terms of Service
             </a>{" "}
             and{" "}
-            <a
-              href="/privacy" // Replace with your actual Privacy Policy URL
-              className="underline hover:text-black"
-            >
+            <a href="/privacy" className="underline hover:text-black">
               Privacy Policy
             </a>
             , and to receive periodic emails with updates.
