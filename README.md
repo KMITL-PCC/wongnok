@@ -7,7 +7,7 @@ A full-stack web application for restaurant reviews.
 ## Project Structure
 
 - **frontend/** – React Router + Vite + TailwindCSS frontend
-- **backend/** – Express.js TypeScript backend API
+- **backend/** – Express.js TypeScript express API
 
 ## Features
 
@@ -18,6 +18,16 @@ A full-stack web application for restaurant reviews.
 - Docker support for both frontend and backend
 
 ## Getting Started
+
+### Easy start
+
+1. Set .env file
+
+2. Run Frontend and Backend from docker
+
+   ```sh
+   docker-compose up -d --build
+   ```
 
 ### Prerequisites
 
@@ -52,8 +62,8 @@ cd frontend
 npm run dev
 ```
 
-- Frontend: http://localhost:5173
-- Backend: http://localhost:3000
+- Frontend: http://localhost:3000
+- Backend: http://localhost:3001
 
 ### Building for Production
 

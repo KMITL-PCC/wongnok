@@ -7,7 +7,6 @@ RUN npm install
 
 COPY . .
 
-
 # รัน prisma generate หลังจาก install เสร็จ
 RUN npx prisma generate
 
