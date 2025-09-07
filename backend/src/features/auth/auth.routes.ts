@@ -13,39 +13,39 @@ const router = Router();
 //local
 router.post(
   "/register/send-otp",
-  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
+  // rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
   isLogedIn,
   authControllers.registerStep1_sendOtp
 );
 
 router.post(
   "/register/verify",
-  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
+  // rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
   authControllers.registerStep2_verifyOTPandCreateUser
 );
 
 router.post(
   "/login",
   // rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
-  // isLogedIn,
+  isLogedIn,
   authControllers.login
 );
 
 router.post(
   "/forgotPass",
-  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }), //5req : 20 minutes
+  // rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }), //5req : 20 minutes
   authControllers.forgotPass
 );
 
 router.post(
   "/verify-otp",
-  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
+  // rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
   authControllers.OTPverify
 );
 
 router.post(
   "/resend-otp",
-  rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
+  // rateLimit({ windowMs: 10 * 60 * 1000, max: 10 }),
   authControllers.resendOTP
 );
 
@@ -55,7 +55,7 @@ router.patch("/updatepass", isAuthenticated, authControllers.updatePass);
 //google
 router.get(
   "/google",
-  rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
+  // rateLimit({ windowMs: 20 * 60 * 1000, max: 5 }),
   isLogedIn,
   passport.authenticate("google", { scope: ["profile", "email"] }) // ขอสิทธิ์เข้าถึง profile และ email
 );

@@ -24,7 +24,7 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
-    command: sh -c "npx prisma migrate dev && npm start"
+    command: sh -c "npx prisma migrate deploy && npm start"
 
   # frontend:
   #   build: ./frontend
@@ -35,6 +35,17 @@ services:
   #     - mern_network
   # environment:
   #   REACT_APP_API_URL: http://backend:3000
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:3001
+    networks:
+      - mern_network
+    restart: always
 
   redis:
     image: redis:7.0-alpine
