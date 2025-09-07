@@ -258,7 +258,7 @@ const ForgotPasswordForm = () => {
   };
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-10 pb-64 font-sans">
+    <div className="relative flex flex-col items-center justify-center min-h-screen p-10 pb-64 font-sans bg-gray-50">
       {/* Popup Message */}
       {message && (
         <div
@@ -293,14 +293,14 @@ const ForgotPasswordForm = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="Your Email"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading || !csrfToken}
-              className="w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
             >
               {isLoading ? "Sending..." : "Send Reset Link"}
             </button>
@@ -352,7 +352,7 @@ const ForgotPasswordForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
             >
               {isLoading ? "Verifying..." : "Verify Code"}
             </button>
@@ -368,7 +368,7 @@ const ForgotPasswordForm = () => {
             </div>
           </form>
 
-          <div className="mt-6 space-y-4 text-center text-sm">
+          <div className="mt-6 space-y-4 text-sm text-center">
             <p className="text-gray-600">
               Didn't receive the code?{" "}
               {countdown > 0 ? (
@@ -420,7 +420,7 @@ const ForgotPasswordForm = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="New Password"
               />
             </div>
@@ -436,14 +436,14 @@ const ForgotPasswordForm = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="Confirm New Password"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full justify-center rounded-md border border-transparent bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
             >
               {isLoading ? "Saving..." : "Reset Password"}
             </button>

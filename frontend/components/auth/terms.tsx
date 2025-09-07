@@ -15,11 +15,12 @@ export default function TermsOfServicePage() {
 
         <div className="prose max-w-none space-y-4 text-gray-700">
           <p>
-            Welcome to our service! These Terms of Service ("Terms") govern your
-            use of our website, applications, and services (collectively, the
-            "Service"). Please read these Terms carefully before using the
-            Service. Your access to and use of the Service is conditioned on
-            your acceptance of and compliance with these Terms.
+            Welcome to our service! These Terms of Service (&quot;Terms&quot;)
+            govern your use of our website, applications, and services
+            (collectively, the &quot;Service&quot;). Please read these Terms
+            carefully before using the Service. Your access to and use of the
+            Service is conditioned on your acceptance of and compliance with
+            these Terms.
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -74,7 +75,7 @@ export default function TermsOfServicePage() {
           <p>
             You are responsible for safeguarding your account password and for
             any activities or actions under your account. We encourage you to
-            use a "strong" password with your account.
+            use a &quot;strong&quot; password with your account.
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -83,7 +84,7 @@ export default function TermsOfServicePage() {
           <p>
             You are solely responsible for any content, including photos, text,
             and other materials, that you upload, post, or otherwise transmit
-            via the Service ("User Content").
+            via the Service (&quot;User Content&quot;).
           </p>
 
           <h2 className="text-2xl font-semibold text-gray-800">
