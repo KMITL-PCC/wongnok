@@ -13,7 +13,7 @@ import {
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Logo from "../Logo";
 
 const getUserInfo = async () => {
@@ -47,6 +47,7 @@ const userLogout = async () => {
 
 const Header = () => {
   const router = useRouter();
+  const pathname = usePathname();
 
   const [userInfo, setUserInfo] = useState(null);
 
@@ -56,7 +57,7 @@ const Header = () => {
       setUserInfo(userInfo);
     };
     fetchUserInfo();
-  }, []);
+  }, [pathname]);
 
   return (
     <header className="sticky top-0 z-50 w-full border bg-background">

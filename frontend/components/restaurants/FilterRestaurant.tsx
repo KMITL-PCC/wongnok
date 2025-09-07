@@ -30,12 +30,13 @@ const filters: FilterProps = {
 
   ratingsData: [
     { id: "rating2", name: "2.0+" },
-    { id: "rating5", name: "5.0+" },
+    { id: "rating4", name: "4.0+" },
   ],
 
   pricesData: [
-    { id: "price1", name: "Price 1" },
-    { id: "price2", name: "Price 2" },
+    { id: "40", name: "40+" },
+    { id: "40-100", name: "40-100" },
+    { id: "100", name: "100+" },
   ],
 };
 
@@ -50,9 +51,9 @@ const FilterRestaurant = () => {
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategories);
 
-  const [rating, setRating] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] = useState<string[]>([]);
 
-  const [price, setPrice] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
@@ -98,15 +99,17 @@ const FilterRestaurant = () => {
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
             <h1 className="font-semibold text-md">Rating</h1>
-            <div className="flex items-center gap-2">
-              <Checkbox id="rating2" />
-              <Label htmlFor="rating2">2.0+</Label>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox id="rating5" />
-              <Label htmlFor="rating5">4.0+</Label>
-            </div>
+            {ratingsData.map((rating) => (
+              <div className="flex items-center gap-2" key={rating.id}>
+                <Checkbox
+                  id={rating.id}
+                  checked={selectedCategories.includes(rating.id)}
+                  onCheckedChange={() => handleCategoryChange(rating.id)}
+                />
+                <Label htmlFor={rating.id}>{rating.name}</Label>
+              </div>
+            ))}
           </div>
 
           <Separator />

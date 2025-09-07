@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=ร้านอาหารตามสั้ง&rating=2/4&price=40/40-100/100`,
 // );
 
-const getRestaurants = async (categories: string) => {
+const getRestaurants = async (categories?: string) => {
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?categories=${categories}`,
   );
@@ -27,7 +27,7 @@ const RestaurantsPage = async ({
 }) => {
   const categories = (await searchParams).categories;
 
-  console.log(categories);
+  // console.log(categories);
   // const restaurants = await getRestaurants(categories);
 
   return (
