@@ -6,16 +6,13 @@ import { Checkbox } from "../ui/checkbox";
 import { Separator } from "../ui/separator";
 import { ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
-import {
-  Sheet,
-  SheetTrigger,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "../ui/sheet";
+import { Sheet, SheetTrigger, SheetContent } from "../ui/sheet";
+import { useState } from "react";
 
 const FilterRestaurant = () => {
+  const [category, setCategory] = useState<string[]>([]);
+  console.log(category);
+
   return (
     <>
       <Card className="hidden w-50 md:flex lg:w-70">
@@ -24,7 +21,10 @@ const FilterRestaurant = () => {
           <div className="flex flex-col gap-3 px-3">
             <h1 className="font-semibold text-md">Category</h1>
             <div className="flex items-center gap-2">
-              <Checkbox id="category1" />
+              <Checkbox
+                id="category1"
+                onChange={() => setCategory([...category, "category1"])}
+              />
               <Label htmlFor="category1">Category 1</Label>
             </div>
             <div className="flex items-center gap-2">
@@ -45,7 +45,7 @@ const FilterRestaurant = () => {
 
             <div className="flex items-center gap-2">
               <Checkbox id="rating5" />
-              <Label htmlFor="rating5">5.0+</Label>
+              <Label htmlFor="rating5">4.0+</Label>
             </div>
           </div>
 

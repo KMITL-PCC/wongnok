@@ -3,11 +3,22 @@ import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCar
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
 import Link from "next/link";
+import restaurantData from "@/mockdata/restaurant.json";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import restaurantData from "@/mockdata/restaurant.json";
+// const res = await fetch(
+//   `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=ร้านอาหารตามสั้ง&rating=2/4&price=40/40-100/100`,
+// );
+
+// const getRestaurants = async () => {
+//   const res = await fetch(
+//     `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=&rating=&price=`,
+//   );
+//   const data = await res.json();
+//   return data;
+// };
 
 const RestaurantsPage = async () => {
   return (
