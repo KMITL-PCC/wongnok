@@ -1,5 +1,7 @@
 import FilterRestaurant from "@/components/restaurants/FilterRestaurant";
-import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCard.tsx";
+import PrimaryRestaurantCard, {
+  RestaurantProps,
+} from "@/components/restaurants/PrimaryRestaurantCard.tsx";
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
 import Link from "next/link";
@@ -12,9 +14,9 @@ import { Separator } from "@/components/ui/separator";
 //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=ร้านอาหารตามสั้ง&rating=2/4&price=40/40-100/100`,
 // );
 
-const getRestaurants = async (categories?: string) => {
+const getRestaurants = async (categories: string = "") => {
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?categories=${categories}`,
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories}`,
   );
   const data = await res.json();
   return data;
@@ -27,8 +29,12 @@ const RestaurantsPage = async ({
 }) => {
   const categories = (await searchParams).categories;
 
-  // console.log(categories);
-  // const restaurants = await getRestaurants(categories);
+  const { restaurant } = await getRestaurants(categories as any);
+  console.log(restaurant);
+
+  const restaurantSlice = restaurant;
+
+  console.log(restaurantSlice);
 
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
@@ -97,10 +103,10 @@ const RestaurantsPage = async ({
               {/* <PrimaryRestaurantCard />
               <PrimaryRestaurantCard />
               <PrimaryRestaurantCard /> */}
-              {restaurantData.map((restaurant) => (
+              {restaurantSlice.map((restaurant: RestaurantProps) => (
                 <Link
-                  href={`/restaurants/${restaurant.id}`}
-                  key={restaurant.id}
+                  href={`/restaurants/${restaurant.name}`}
+                  key={restaurant.name}
                 >
                   <PrimaryRestaurantCard restaurant={restaurant} />
                 </Link>

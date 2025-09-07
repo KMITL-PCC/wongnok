@@ -7,13 +7,15 @@ import {
   CardTitle,
 } from "../ui/card";
 
-interface RestaurantProps {
-  id: number;
+export interface RestaurantProps {
+  // id: number;
   name: string;
   image: string;
-  description: string;
-  rating: number;
-  reviews: number;
+  description?: string;
+  avgRating: number;
+  totalReviews: number;
+  categories: string[];
+  images: string[];
 }
 
 const PrimaryRestaurantCard = ({
@@ -24,46 +26,46 @@ const PrimaryRestaurantCard = ({
   return (
     <Card className="gap-2">
       <CardHeader className="flex flex-col gap-2">
-        <div className="flex items-center justify-between w-full gap-2">
-          <div className="relative w-full border border-border h-30 rounded-xl md:h-40">
-            <Image
-              src={restaurant.image}
+        <div className="flex w-full items-center justify-between gap-2">
+          <div className="border-border relative h-30 w-full rounded-xl border md:h-40">
+            {/* <Image
+              src={restaurant.images[0]}
               alt={restaurant.name}
               fill
-              className="object-cover rounded-xl"
-            />
+              className="rounded-xl object-cover"
+            /> */}
           </div>
-          <div className="relative w-full border border-border h-30 rounded-xl md:h-40">
-            <Image
-              src={restaurant.image}
+          <div className="border-border relative h-30 w-full rounded-xl border md:h-40">
+            {/* <Image
+              src={restaurant.images[1]}
               alt={restaurant.name}
               fill
-              className="object-cover rounded-xl"
-            />
+              className="rounded-xl object-cover"
+            /> */}
           </div>
-          <div className="relative hidden w-full border border-border h-30 rounded-xl md:block md:h-40">
-            <Image
-              src={restaurant.image}
+          <div className="border-border relative hidden h-30 w-full rounded-xl border md:block md:h-40">
+            {/* <Image
+              src={restaurant.images[2]}
               alt={restaurant.name}
               fill
-              className="object-cover rounded-xl"
-            />
+              className="rounded-xl object-cover"
+            /> */}
           </div>
-          <div className="relative hidden w-full border border-border h-30 rounded-xl md:h-40 lg:block">
-            <Image
-              src={restaurant.image}
+          <div className="border-border relative hidden h-30 w-full rounded-xl border md:h-40 lg:block">
+            {/* <Image
+              src={restaurant.images[3]}
               alt={restaurant.name}
               fill
-              className="object-cover rounded-xl"
-            />
+              className="rounded-xl object-cover"
+            /> */}
           </div>
         </div>
         <CardTitle>{restaurant.name}</CardTitle>
         <CardDescription>{restaurant.description}</CardDescription>
       </CardHeader>
       <CardContent className="flex justify-between gap-2 text-sm">
-        <p>{restaurant.rating} ⭐</p>
-        <p>{restaurant.reviews} reviews</p>
+        <p>{restaurant.avgRating} ⭐</p>
+        <p>{restaurant.totalReviews} reviews</p>
       </CardContent>
     </Card>
   );

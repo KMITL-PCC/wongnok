@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 
+import { Restaurant } from "../../types/restaurant";
 import restaurantServices from "./restaurant.services";
 
 function validateNestedFields(obj: any, requiredFields: string[]): string[] {
@@ -70,27 +71,29 @@ export default {
   },
 
   getRestaurants: async (req: Request, res: Response, next: NextFunction) => {
-    const limit = Number(req.query.limit) || 20;
-    const page = Number(req.query.page) || 1;
-    const category = (req.query.category as string) || "";
-    const sort = (req.query.sort as string) || "desc";
-    const sortBy = (req.query.sortBy as string) || "name";
-    const search = (req.query.search as string) || "";
+    const queryRating = Number(req.query.rating);
+    const pricerateQuery = req.query.priceRate as string;
 
-    if (!limit || !page) {
-      return res.status(400).json({ message: "missing limit or page query" });
-    }
+    const priceRate = ["40", "40-100", "100"].includes(pricerateQuery)
+      ? pricerateQuery
+      : "";
+
+    const rating = [2, 4].includes(queryRating) ? queryRating : 0;
+
+    const data: Restaurant.query = {
+      limit: Number(req.query.limit) || 20,
+      page: Number(req.query.page) || 1,
+      category: (req.query.category as string) || "",
+      sort: (req.query.sort as string) || "desc",
+      sortBy: (req.query.sortBy as string) || "avgRating",
+      search: (req.query.search as string) || "",
+      rating,
+      priceRate,
+    };
 
     try {
       const { restaurant, totalPages, currentPage, itemPerPage } =
-        await restaurantServices.getRestaurants(
-          limit,
-          page,
-          category,
-          search,
-          sort,
-          sortBy
-        );
+        await restaurantServices.getRestaurants(data as Restaurant.query);
 
       res.status(200).json({
         restaurant: restaurant,
