@@ -51,11 +51,11 @@ model Restaurant {
   id            String    @id @default(cuid()) @map("restaurant_id") // ใช้ CUID
   ownerId       String?   @map("owner_id") @db.VarChar(50) // owner_id เป็น null ได้
   name          String    @db.VarChar(255)
-  description   String?   @db.Text
-  address       String    @db.VarChar(500)
+  description   String   @db.Text
+  address       String?    @db.VarChar(500)
   // DECIMAL(10, 8) -> Decimal ใน Prisma
-  latitude      Decimal
-  longitude     Decimal
+  latitude      Decimal?
+  longitude     Decimal?
   status        RestaurantStatus @default(Temporarily_Closed)
   minPrice      Decimal   @map("min_price") @db.Decimal(5, 2)
   maxPrice      Decimal   @map("max_price") @db.Decimal(5, 2)

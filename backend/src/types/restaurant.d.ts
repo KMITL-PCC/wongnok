@@ -17,4 +17,15 @@ export declare namespace Restaurant {
     opentime: string;
     closetime: string;
   }
+
+  interface query {
+    limit: number;
+    page: number;
+    category: string;
+    sort: string;
+    sortBy: string;
+    search: string;
+    rating: number;
+    priceRate: string;
+  }
 }
