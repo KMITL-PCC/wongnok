@@ -12,15 +12,24 @@ import { Separator } from "@/components/ui/separator";
 //   `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=ร้านอาหารตามสั้ง&rating=2/4&price=40/40-100/100`,
 // );
 
-// const getRestaurants = async () => {
-//   const res = await fetch(
-//     `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=&rating=&price=`,
-//   );
-//   const data = await res.json();
-//   return data;
-// };
+const getRestaurants = async (categories: string) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?categories=${categories}`,
+  );
+  const data = await res.json();
+  return data;
+};
 
-const RestaurantsPage = async () => {
+const RestaurantsPage = async ({
+  searchParams,
+}: {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) => {
+  const categories = (await searchParams).categories;
+
+  console.log(categories);
+  // const restaurants = await getRestaurants(categories);
+
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
       {/* Filter */}

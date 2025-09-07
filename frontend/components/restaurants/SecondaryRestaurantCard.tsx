@@ -1,12 +1,6 @@
 import Image from "next/image";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "@/lib/utils";
 
 interface RestaurantProps {
@@ -30,8 +24,8 @@ const SecondaryRestaurantCard = ({
       <CardHeader className="flex flex-col gap-2 p-0">
         <div className="relative w-full h-30 md:h-40">
           <Image
-            src={restaurant?.image}
-            alt={restaurant?.name}
+            src={restaurant?.image || ""}
+            alt={restaurant?.name || ""}
             fill
             className="object-cover rounded-t-lg"
           />

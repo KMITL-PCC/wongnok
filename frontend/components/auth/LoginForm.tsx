@@ -52,6 +52,7 @@ export default function LoginForm() {
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+  const router = useRouter();
 
   // Prefetch หน้าแรกให้ไวขึ้น
   useEffect(() => {
