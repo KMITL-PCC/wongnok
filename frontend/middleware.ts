@@ -7,7 +7,7 @@ export async function middleware(request: NextRequest) {
   const userSession = cookieStore.get("connect.sid");
   const url = request.nextUrl.clone();
   const isLoginRoute = url.pathname === "/login";
-  const isRegisterRoute = url.pathname === "/register";
+  const isRegisterRoute = url.pathname === "/registe";
   const isForGotPasswordRoute = url.pathname === "/forgotpassword";
   if (isLoginRoute) {
     if (!userSession) {
