@@ -1,7 +1,8 @@
 "use client";
 
+// ✅ 1. Import useState and useEffect (already present, just confirming)
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation"; // ✅ 1. Import useRouter
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -83,6 +84,12 @@ export default function RegisterForm() {
   const [registrationEmail, setRegistrationEmail] = useState("");
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
+  // ✅ 2. Add state for countdown timer, resend loading, and original registration data
+  const [countdown, setCountdown] = useState(0);
+  const [isResending, setIsResending] = useState(false);
+  const [registrationData, setRegistrationData] =
+    useState<RegisterFormValues | null>(null);
+
   useEffect(() => {
     const fetchCsrfToken = async () => {
       try {
@@ -109,6 +116,18 @@ export default function RegisterForm() {
     };
     fetchCsrfToken();
   }, []);
+
+  // ✅ 3. Add useEffect to handle the countdown timer
+  useEffect(() => {
+    if (countdown <= 0) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prevCountdown) => prevCountdown - 1);
+    }, 1000);
+
+    // Cleanup interval on component unmount or when countdown reaches 0
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -160,7 +179,11 @@ export default function RegisterForm() {
 
       if (response.ok) {
         setRegistrationEmail(values.email);
+        // ✅ 4. Store registration data for the resend function
+        setRegistrationData(values);
         setShowOtpForm(true);
+        // ✅ 5. Start the countdown after successfully sending the first OTP
+        setCountdown(50);
         toast.success("Registration Successful!", {
           description: "Please check your email for the OTP code.",
         });
@@ -180,7 +203,6 @@ export default function RegisterForm() {
     }
   }
 
-  // ✅ 3. แก้ไขฟังก์ชัน onOtpSubmit ทั้งหมด
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
     if (!csrfToken) {
       toast.error("Security Error", {
@@ -200,7 +222,8 @@ export default function RegisterForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "CSRF-Token": csrfToken,
+          // Corrected header name for consistency
+          "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
           email: registrationEmail,
@@ -217,9 +240,8 @@ export default function RegisterForm() {
             "Your account is verified. Redirecting to the homepage...",
         });
 
-        // หน่วงเวลา 2 วินาทีเพื่อให้ผู้ใช้อ่านข้อความ แล้วค่อย redirect
         setTimeout(() => {
-          router.push("/"); // พาไปยังหน้าหลัก
+          router.push("/");
         }, 2000);
       } else {
         const errorData = await response.json();
@@ -237,9 +259,63 @@ export default function RegisterForm() {
     }
   }
 
+  // ✅ 6. Create the function to handle resending the OTP
+  async function handleResendOtp() {
+    if (!csrfToken || !registrationData) {
+      toast.error("Error", {
+        description: "Cannot resend OTP. Please try registering again.",
+      });
+      return;
+    }
+
+    setIsResending(true);
+    toast.info("Resending OTP...");
+
+    try {
+      const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+      const response = await fetch(`${backendURL}/auth/register/send-otp`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
+        },
+        // Resend the original registration data
+        body: JSON.stringify({
+          username: registrationData.username,
+          email: registrationData.email,
+          password: registrationData.password,
+        }),
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        toast.success("OTP Resent!", {
+          description: "A new OTP has been sent to your email.",
+        });
+        setCountdown(50); // Restart the countdown
+      } else {
+        const errorData = await response.json();
+        toast.error("Failed to Resend OTP", {
+          description:
+            errorData.message || "Something went wrong. Please try again.",
+        });
+      }
+    } catch (error) {
+      console.error("Resend OTP connection error:", error);
+      toast.error("Connection Error", {
+        description: "Unable to connect to the server. Please try again.",
+      });
+    } finally {
+      setIsResending(false);
+    }
+  }
+
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
+    // ✅ 7. Reset the new states when going back
+    setRegistrationData(null);
+    setCountdown(0);
     registerForm.reset();
   };
 
@@ -304,9 +380,30 @@ export default function RegisterForm() {
           </Button>
         </form>
       </Form>
+
+      {/* ✅ 8. Add UI for the resend button and countdown timer */}
+      <div className="mt-4 text-center text-sm text-gray-600">
+        Didn't receive the code?{" "}
+        {countdown > 0 ? (
+          <span className="font-semibold text-gray-500">
+            Resend in {countdown}s
+          </span>
+        ) : (
+          <Button
+            type="button"
+            variant="link"
+            className="h-auto p-0 font-semibold text-green-600 hover:underline disabled:text-gray-400 disabled:no-underline"
+            onClick={handleResendOtp}
+            disabled={isResending}
+          >
+            {isResending ? "Resending..." : "Resend OTP"}
+          </Button>
+        )}
+      </div>
     </div>
   );
 
+  // The RegisterMainForm component remains unchanged
   const RegisterMainForm = () => (
     <div className="flex min-h-screen flex-col bg-white p-10 md:p-10">
       <div className="flex flex-grow items-start justify-center">
@@ -414,7 +511,6 @@ export default function RegisterForm() {
                       />
                     </FormControl>
                     <div className="space-y-1 leading-none">
-                      {/* MODIFIED: Added whitespace-nowrap */}
                       <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
                         I agree to the {""}
                         <a
