@@ -14,8 +14,14 @@ export declare namespace Restaurant {
 
   interface time {
     weekday: number;
-    opentime: string;
-    closetime: string;
+    openTime: string;
+    closeTime: string;
+  }
+
+  interface service {
+    service: {
+      service: "string";
+    };
   }
 
   interface query {
