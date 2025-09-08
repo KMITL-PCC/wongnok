@@ -12,15 +12,6 @@ const weekArrayFromat = (openninghour: Restaurant.time[]) => {
   };
 };
 
-//
-const serviceArrayFormat = (services: Restaurant.service[]) => {
-  const servicesArray = [];
-  for (let i = 0; i < services.length; i++) {
-    servicesArray.push(services[i].service.service);
-  }
-  return servicesArray;
-};
-
 export default {
   getRestaurants: async (data: Restaurant.query) => {
     const { limit, page, category, sort, sortBy, search, rating, priceRate } =
@@ -205,6 +196,11 @@ export default {
         longitude: true,
         minPrice: true,
         maxPrice: true,
+        images: {
+          select: {
+            imageUrl: true,
+          },
+        },
         openninghour: {
           take: 7,
           select: {
@@ -240,27 +236,25 @@ export default {
       information?.openninghour as Restaurant.time[]
     );
 
-    //3. map service
-    const services = serviceArrayFormat(
-      information.restaurantServices as Restaurant.service[]
-    );
-
     //map all data
     const restaurantInformation = {
       name: information.name,
-      desciption: information.description,
+      description: information.description,
       address: information.address,
       latitude: information.latitude,
       logitude: information.longitude,
       status: information.status,
       minPrice: information.minPrice,
       maxPrice: information.maxPrice,
+      image: information.images.map((image) => image.imageUrl),
       openingHour,
       contact: {
         contactType: information.contact[0].contactType,
         contactDetail: information.contact[0].contactDetail,
       },
-      services,
+      services: information.restaurantServices.map(
+        (service) => service.service.service
+      ),
     };
 
     return restaurantInformation;
