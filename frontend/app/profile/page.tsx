@@ -1,4 +1,11 @@
+import ProfileForm from "@/components/userinformation/ProfileForm";
+
 const ProfilePage = () => {
-  return <div>This is Profile Page</div>;
+  return (
+    <div className="px-4">
+      <ProfileForm />
+    </div>
+  );
 };
+
 export default ProfilePage;
