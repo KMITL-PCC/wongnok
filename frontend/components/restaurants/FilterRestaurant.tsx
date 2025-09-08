@@ -30,12 +30,13 @@ const filters: FilterProps = {
 
   ratingsData: [
     { id: "rating2", name: "2.0+" },
-    { id: "rating5", name: "5.0+" },
+    { id: "rating4", name: "4.0+" },
   ],
 
   pricesData: [
-    { id: "price1", name: "Price 1" },
-    { id: "price2", name: "Price 2" },
+    { id: "40", name: "40+" },
+    { id: "40-100", name: "40-100" },
+    { id: "100", name: "100+" },
   ],
 };
 
@@ -47,12 +48,16 @@ const FilterRestaurant = () => {
   const router = useRouter();
 
   const initialCategories = searchParams.get("category")?.split(",") || [];
+  const initialRatings = searchParams.get("rating") || "";
+  const initialPrices = searchParams.get("price") || "";
+
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategories);
 
-  const [rating, setRating] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] =
+    useState<string>(initialRatings);
 
-  const [price, setPrice] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<string>(initialPrices);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
@@ -60,6 +65,14 @@ const FilterRestaurant = () => {
         ? prev.filter((c) => c !== category)
         : [...prev, category],
     );
+  };
+
+  const handleRatingChange = (rating: string) => {
+    setSelectedRatings((prev) => (prev === rating ? "" : rating));
+  };
+
+  const handlePriceChange = (price: string) => {
+    setSelectedPrices((prev) => (prev === price ? "" : price));
   };
 
   useEffect(() => {
@@ -70,8 +83,25 @@ const FilterRestaurant = () => {
     } else {
       params.delete("categories");
     }
+    if (selectedRatings.length > 0) {
+      params.set("ratings", selectedRatings.toString());
+    } else {
+      params.delete("ratings");
+    }
+    if (selectedPrices.length > 0) {
+      params.set("prices", selectedPrices.toString());
+    } else {
+      params.delete("prices");
+    }
     router.push(`${pathname}?${params.toString()}`);
-  }, [selectedCategories, router, pathname, searchParams]);
+  }, [
+    selectedCategories,
+    selectedRatings,
+    selectedPrices,
+    router,
+    pathname,
+    searchParams,
+  ]);
 
   return (
     <>
@@ -98,15 +128,17 @@ const FilterRestaurant = () => {
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
             <h1 className="font-semibold text-md">Rating</h1>
-            <div className="flex items-center gap-2">
-              <Checkbox id="rating2" />
-              <Label htmlFor="rating2">2.0+</Label>
-            </div>
 
-            <div className="flex items-center gap-2">
-              <Checkbox id="rating5" />
-              <Label htmlFor="rating5">4.0+</Label>
-            </div>
+            {ratingsData.map((rating) => (
+              <div className="flex items-center gap-2" key={rating.id}>
+                <Checkbox
+                  id={rating.id}
+                  checked={selectedRatings === rating.id}
+                  onCheckedChange={() => handleRatingChange(rating.id)}
+                />
+                <Label htmlFor={rating.id}>{rating.name}</Label>
+              </div>
+            ))}
           </div>
 
           <Separator />
@@ -114,14 +146,16 @@ const FilterRestaurant = () => {
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
             <h1 className="font-semibold text-md">Price</h1>
-            <div className="flex items-center gap-2">
-              <Checkbox id="price1" />
-              <Label htmlFor="price1">Price 1</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox id="price2" />
-              <Label htmlFor="price2">Price 2</Label>
-            </div>
+            {pricesData.map((price) => (
+              <div className="flex items-center gap-2" key={price.id}>
+                <Checkbox
+                  id={price.id}
+                  checked={selectedPrices === price.id}
+                  onCheckedChange={() => handlePriceChange(price.id)}
+                />
+                <Label htmlFor={price.id}>{price.name}</Label>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>

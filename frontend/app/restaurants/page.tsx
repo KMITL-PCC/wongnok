@@ -10,16 +10,24 @@ import restaurantData from "@/mockdata/restaurant.json";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-// const res = await fetch(
-//   `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurants/get?category=ร้านอาหารตามสั้ง&rating=2/4&price=40/40-100/100`,
-// );
-
-const getRestaurants = async (categories: string = "") => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories}`,
-  );
-  const data = await res.json();
-  return data;
+const getRestaurants = async (
+  categories: string,
+  ratings: string,
+  prices: string,
+) => {
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories || ""}&rating=${ratings || ""}&price=${prices || ""}`,
+    );
+    if (!res.ok) {
+      return { restaurant: [] };
+    }
+    const data = await res.json();
+    return data;
+  } catch (error) {
+    console.error("Error fetching restaurants:", error);
+    return { restaurant: [] };
+  }
 };
 
 const RestaurantsPage = async ({
@@ -27,14 +35,19 @@ const RestaurantsPage = async ({
 }: {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
-  const categories = (await searchParams).categories;
+  const searchParamsData = await searchParams;
+  const { categories, ratings, prices } = searchParamsData;
+  const { restaurant } = await getRestaurants(
+    categories as string,
+    ratings as string,
+    prices as string,
+  );
 
-  const { restaurant } = await getRestaurants(categories as any);
   console.log(restaurant);
 
-  const restaurantSlice = restaurant;
+  // const restaurantSlice = restaurant;
 
-  console.log(restaurantSlice);
+  // console.log(restaurantSlice);
 
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
@@ -43,7 +56,7 @@ const RestaurantsPage = async ({
         <FilterRestaurant />
       </div>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-col flex-1 gap-4">
         {/* Recommended Restaurants */}
         <div>
           <Card>
@@ -80,7 +93,7 @@ const RestaurantsPage = async ({
         </div>
 
         {/* Map */}
-        <div>
+        {/* <div>
           <Card>
             <CardHeader>
               <CardTitle>Map</CardTitle>
@@ -90,7 +103,7 @@ const RestaurantsPage = async ({
               <p>Card Content</p>
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
         {/* Restaurants List*/}
         <div>
@@ -100,17 +113,17 @@ const RestaurantsPage = async ({
             </CardHeader>
             <Separator />
             <CardContent className="grid gap-4">
-              {/* <PrimaryRestaurantCard />
-              <PrimaryRestaurantCard />
-              <PrimaryRestaurantCard /> */}
-              {restaurantSlice.map((restaurant: RestaurantProps) => (
+              {/* <PrimaryRestaurantCard restaurant={restaurantData[0]} />
+              <PrimaryRestaurantCard restaurant={restaurantData[1]} />
+              <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
+              {/* {restaurantData.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.name}`}
-                  key={restaurant.name}
+                  key={restaurant.id}
                 >
                   <PrimaryRestaurantCard restaurant={restaurant} />
                 </Link>
-              ))}
+              ))} */}
             </CardContent>
           </Card>
         </div>
