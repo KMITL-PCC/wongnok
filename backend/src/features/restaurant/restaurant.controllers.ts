@@ -33,14 +33,14 @@ export default {
       "name",
       "description",
       "address",
-      "latitude",
-      "longitude",
+      // "latitude",
+      // "longitude",
     ]);
     const missingPrice = validateNestedFields(price, ["minPrice", "maxPrice"]);
     const missingTime = validateNestedFields(time, [
       "weekday",
-      "opentime",
-      "closetime",
+      "openTime",
+      "closeTime",
     ]);
 
     if (
@@ -57,6 +57,10 @@ export default {
         price,
         time
       );
+
+      res.status(201).json({
+        message: "create success",
+      });
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error("Error during create restaurant ERROR:", error.message);
@@ -113,6 +117,42 @@ export default {
       }
       res.status(500).json({
         message: "Server error during get restaurants",
+      });
+    }
+  },
+
+  getInformation: async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "missing ID",
+      });
+    }
+
+    try {
+      const restaurantInfo = await restaurantServices.Information(id);
+      if (!restaurantInfo) {
+        return res.status(400).json({
+          message: "Can't find restaurant",
+        });
+      }
+
+      res.status(200).json({
+        message: "ok",
+        restaurantInfo,
+      });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(
+          "Error during get restaurant infomation ERROR:",
+          error.message
+        );
+      } else {
+        console.error("Error during get restaurant infomation ERROR:", error);
+      }
+      res.status(500).json({
+        message: "Error during get restaurant infomation",
       });
     }
   },

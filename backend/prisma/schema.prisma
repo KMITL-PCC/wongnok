@@ -84,7 +84,7 @@ enum RestaurantStatus {
 model OpeningHour {
   id            Int     @id @default(autoincrement())
   restaurantId  String
-  weekday       Int     // 0=Sunday ... 6=Saturday
+  weekday       Int     // 0=Sunday ... 6=Saturday and 7 = every day
   openTime      String
   closeTime     String
   restaurant    Restaurant @relation(fields: [restaurantId], references: [id])

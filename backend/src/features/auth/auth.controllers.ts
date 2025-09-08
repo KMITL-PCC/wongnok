@@ -413,7 +413,13 @@ export default {
   },
 
   getUserData: async (req: Request, res: Response) => {
-    const user = req.user as User;
+    const user = req.user as User | undefined;
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
 
     res.status(200).json({
       user: {
