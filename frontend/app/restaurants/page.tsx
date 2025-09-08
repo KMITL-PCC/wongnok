@@ -17,7 +17,7 @@ const getRestaurants = async (
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories || ""}&rating=${ratings || ""}&price=${prices || ""}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories || ""}&rating=${ratings || ""}&priceRate=${prices || ""}`,
     );
     if (!res.ok) {
       return { restaurant: [] };
@@ -45,7 +45,7 @@ const RestaurantsPage = async ({
 
   console.log(restaurant);
 
-  // const restaurantSlice = restaurant;
+  // const restaurantSlice = restaurant
 
   // console.log(restaurantSlice);
 
@@ -56,7 +56,7 @@ const RestaurantsPage = async ({
         <FilterRestaurant />
       </div>
 
-      <div className="flex flex-col flex-1 gap-4">
+      <div className="flex flex-1 flex-col gap-4">
         {/* Recommended Restaurants */}
         <div>
           <Card>
@@ -116,14 +116,14 @@ const RestaurantsPage = async ({
               {/* <PrimaryRestaurantCard restaurant={restaurantData[0]} />
               <PrimaryRestaurantCard restaurant={restaurantData[1]} />
               <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
-              {/* {restaurantData.map((restaurant: RestaurantProps) => (
+              {restaurant.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.name}`}
                   key={restaurant.id}
                 >
                   <PrimaryRestaurantCard restaurant={restaurant} />
                 </Link>
-              ))} */}
+              ))}
             </CardContent>
           </Card>
         </div>
