@@ -1,35 +1,42 @@
 import { test, expect } from '@playwright/test';
 
 test('Register with mocked OTP Email', async ({ page }) => {
-  // ไปที่หน้า register
+
   await page.goto('http://localhost:3000/register');
 
-  // ดัก request /api/send-otp-email
-  await page.route('**/api/send-otp-email', async route => {
-    // ✅ ส่ง response ปลอมกลับไปเลย
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        success: true,
-        message: 'Mocked OTP sent',
-        otp: '123456',   // mock OTP ที่เราคุมเอง
-      }),
-    });
-  });
+  // wait 1000 ms
+  await page.waitForTimeout(1000);
+  await page.getByRole('textbox', { name: 'username' }).fill('AA');
+  // wait 500 ms
+  await page.waitForTimeout(500); 
 
-  // กรอกข้อมูลสมัคร
-  await page.fill('#username', 'testuser');
-  await page.fill('#email', 'testuser@example.com');
-  await page.fill('#password', 'Pass1234!');
-  await page.fill('#confirmPassword', 'Pass1234!');
-  await page.check('#pdpa');
-  await page.click('button[type="submit"]');
+  await page.getByRole('textbox', { name: 'Email' }).fill('test@example.com');
+  await page.getByRole('textbox', { name: 'Password', exact: true }).fill('test1234');
+  await page.getByRole('textbox', { name: 'Confirm Password' , exact: true  }).fill('test1234');
+  
+  await page.getByRole('checkbox', { name: 'I agree to the Terms of' }).click();
 
-  // ✅ กรอก OTP mock แทนของจริง
-  await page.fill('#otp', '123456');
-  await page.click('#submit-otp');
+  // await page.route('**/api/send-otp', async route => {
+  //   await route.fulfill({
+  //       status: 200,
+  //       body: JSON.stringify({ otp: '12345' }),
+  //     });
+  //   });
 
-  // คาดหวัง register success
-  await expect(page.locator('text=Registration Successful')).toBeVisible();
+  await page.getByRole('button', { name: 'Register', exact: true }).click();
+
+  //wait fpr 2 seconds
+  // await page.waitForTimeout(2000);
+  await page.getByRole('textbox', { name: 'OTP Code' }).fill('12345');
+  await page.getByRole('button', { name: 'Verify Account' }).click();
+
+  // wiat for 2 seconds
+  await expect(page.getByText('Registration Successful')).toBeVisible();
+
+  //wiat for 3 seconds
+  await page.waitForTimeout(3000);
+
+  // await page.goto('http://localhost:3000');
+  // await page.waitForTimeout(2000);
+
 });

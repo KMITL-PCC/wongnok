@@ -60,9 +60,9 @@ export default defineConfig({
       },
     },
     // Extra: cross-browser run (เฉพาะ chromium)
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+    // {
+    //   name: 'chromium',
+    //   use: { ...devices['Desktop Chrome'] },
+    // },
   ],
 });

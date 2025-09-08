@@ -24,7 +24,20 @@ System Testing
 ---
 
 ## + Run Flie Test
-- npx playwright test tests/backend/authApi.spec.ts
+
+On Folders Backend-In-Tests you can run Each Test File
+- npx playwright test tests/Backend-In-Tests/loginintegration.spec.js
+
+---
+
+On Folders E2E-Test you can run Each Test
+- npx playwright test tests/Backend-In-Tests/loginintegration.spec.js
+- npx playwright test tests/E2E-Tests/Register.spec.js
+
+---
+
+On Folders Frontend-In-Tests you can run Each Test File
+- npx playwright test tests/Frontend-In-Tests/loginintegration.spec.js
 
 ---
 
