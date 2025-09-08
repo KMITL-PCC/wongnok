@@ -118,7 +118,7 @@ const RestaurantsPage = async ({
               <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
               {restaurant.map((restaurant: RestaurantProps) => (
                 <Link
-                  href={`/restaurants/${restaurant.name}`}
+                  href={`/restaurants/${restaurant.id}`}
                   key={restaurant.id}
                 >
                   <PrimaryRestaurantCard restaurant={restaurant} />
