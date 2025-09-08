@@ -10,11 +10,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { Utensils } from "lucide-react";
+
 import Logo from "../Logo";
+import Link from "next/link";
+
+interface User {
+  role: string;
+}
+
+interface UserInfo {
+  user: User;
+}
 
 const getUserInfo = async () => {
   try {
@@ -49,7 +58,7 @@ const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
 
-  const [userInfo, setUserInfo] = useState(null);
+  const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -95,6 +104,25 @@ const Header = () => {
                       <span>ข้อมูลส่วนตัว</span>
                     </Link>
                   </DropdownMenuItem>
+
+                  {userInfo?.user.role === "RestaurantOwner" ? (
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="flex items-center gap-2">
+                        <Utensils size={20} />
+                        <span>ร้านค้าของฉัน</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem>
+                      <Link
+                        href="/restaurants/create"
+                        className="flex items-center gap-2"
+                      >
+                        <Utensils size={20} />
+                        <span>สร้างร้านค้า</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem
                     className="flex items-center gap-2"
                     onClick={() => {
@@ -148,6 +176,27 @@ const Header = () => {
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
+
+                {userInfo?.user.role === "RestaurantOwner" ? (
+                  <DropdownMenuItem>
+                    <Link href="/profile" className="flex items-center gap-2">
+                      <Utensils size={20} />
+                      <span>ร้านค้าของฉัน</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem>
+                    <Link
+                      href="/restaurants/create"
+                      className="flex items-center gap-2"
+                    >
+                      <Utensils size={20} />
+                      <span>สร้างร้านค้า</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+
                 <DropdownMenuItem
                   className="flex items-center gap-2"
                   onClick={() => {
@@ -181,7 +230,6 @@ const Header = () => {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-        {/* <Button onClick={() => getUserInfo().then(console.log)}>Test</Button> */}
       </div>
     </header>
   );

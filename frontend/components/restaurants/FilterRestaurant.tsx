@@ -48,12 +48,16 @@ const FilterRestaurant = () => {
   const router = useRouter();
 
   const initialCategories = searchParams.get("category")?.split(",") || [];
+  const initialRatings = searchParams.get("rating") || "";
+  const initialPrices = searchParams.get("price") || "";
+
   const [selectedCategories, setSelectedCategories] =
     useState<string[]>(initialCategories);
 
-  const [selectedRatings, setSelectedRatings] = useState<string[]>([]);
+  const [selectedRatings, setSelectedRatings] =
+    useState<string>(initialRatings);
 
-  const [selectedPrices, setSelectedPrices] = useState<string[]>([]);
+  const [selectedPrices, setSelectedPrices] = useState<string>(initialPrices);
 
   const handleCategoryChange = (category: string) => {
     setSelectedCategories((prev) =>
@@ -61,6 +65,14 @@ const FilterRestaurant = () => {
         ? prev.filter((c) => c !== category)
         : [...prev, category],
     );
+  };
+
+  const handleRatingChange = (rating: string) => {
+    setSelectedRatings((prev) => (prev === rating ? "" : rating));
+  };
+
+  const handlePriceChange = (price: string) => {
+    setSelectedPrices((prev) => (prev === price ? "" : price));
   };
 
   useEffect(() => {
@@ -71,8 +83,25 @@ const FilterRestaurant = () => {
     } else {
       params.delete("categories");
     }
+    if (selectedRatings.length > 0) {
+      params.set("ratings", selectedRatings.toString());
+    } else {
+      params.delete("ratings");
+    }
+    if (selectedPrices.length > 0) {
+      params.set("prices", selectedPrices.toString());
+    } else {
+      params.delete("prices");
+    }
     router.push(`${pathname}?${params.toString()}`);
-  }, [selectedCategories, router, pathname, searchParams]);
+  }, [
+    selectedCategories,
+    selectedRatings,
+    selectedPrices,
+    router,
+    pathname,
+    searchParams,
+  ]);
 
   return (
     <>
@@ -104,8 +133,8 @@ const FilterRestaurant = () => {
               <div className="flex items-center gap-2" key={rating.id}>
                 <Checkbox
                   id={rating.id}
-                  checked={selectedCategories.includes(rating.id)}
-                  onCheckedChange={() => handleCategoryChange(rating.id)}
+                  checked={selectedRatings === rating.id}
+                  onCheckedChange={() => handleRatingChange(rating.id)}
                 />
                 <Label htmlFor={rating.id}>{rating.name}</Label>
               </div>
@@ -117,14 +146,16 @@ const FilterRestaurant = () => {
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
             <h1 className="font-semibold text-md">Price</h1>
-            <div className="flex items-center gap-2">
-              <Checkbox id="price1" />
-              <Label htmlFor="price1">Price 1</Label>
-            </div>
-            <div className="flex items-center gap-2">
-              <Checkbox id="price2" />
-              <Label htmlFor="price2">Price 2</Label>
-            </div>
+            {pricesData.map((price) => (
+              <div className="flex items-center gap-2" key={price.id}>
+                <Checkbox
+                  id={price.id}
+                  checked={selectedPrices === price.id}
+                  onCheckedChange={() => handlePriceChange(price.id)}
+                />
+                <Label htmlFor={price.id}>{price.name}</Label>
+              </div>
+            ))}
           </div>
         </CardContent>
       </Card>
