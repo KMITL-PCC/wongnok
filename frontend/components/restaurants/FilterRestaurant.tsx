@@ -29,12 +29,12 @@ const filters: FilterProps = {
   ],
 
   ratingsData: [
-    { id: "rating2", name: "2.0+" },
-    { id: "rating4", name: "4.0+" },
+    { id: "2", name: "2.0+" },
+    { id: "4", name: "4.0+" },
   ],
 
   pricesData: [
-    { id: "40", name: "40+" },
+    { id: "40", name: "ต่ำกว่า40" },
     { id: "40-100", name: "40-100" },
     { id: "100", name: "100+" },
   ],

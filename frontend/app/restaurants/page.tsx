@@ -52,7 +52,7 @@ const RestaurantsPage = async ({
 
   // console.log(restaurant);
 
-  // const restaurantSlice = restaurant;
+  // const restaurantSlice = restaurant
 
   // console.log(restaurantSlice);
 
@@ -123,14 +123,14 @@ const RestaurantsPage = async ({
               {/* <PrimaryRestaurantCard restaurant={restaurantData[0]} />
               <PrimaryRestaurantCard restaurant={restaurantData[1]} />
               <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
-              {/* {restaurantData.map((restaurant: RestaurantProps) => (
+              {restaurant.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.id}`}
                   key={restaurant.id}
                 >
                   <PrimaryRestaurantCard restaurant={restaurant} />
                 </Link>
-              ))} */}
+              ))}
             </CardContent>
           </Card>
         </div>

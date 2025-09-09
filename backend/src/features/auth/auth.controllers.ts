@@ -15,7 +15,11 @@ export default {
       return res.status(400).json({ message: "Missing user data" });
     }
 
-    console.log(req.body);
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isEmail) {
+      return res.status(400).json({ message: "email wrong format" });
+    }
+
     try {
       const result = await authServices.checkUserNotExistence(username, email);
 
@@ -193,6 +197,11 @@ export default {
       return res
         .status(400)
         .json({ message: "Email or Username are required." });
+    }
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!isEmail) {
+      return res.status(400).json({ message: "email wrong format" });
     }
 
     try {
@@ -413,7 +422,13 @@ export default {
   },
 
   getUserData: async (req: Request, res: Response) => {
-    const user = req.user as User;
+    const user = req.user as User | undefined;
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
+    }
 
     res.status(200).json({
       user: {

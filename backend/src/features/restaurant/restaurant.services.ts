@@ -2,6 +2,16 @@ import { equal } from "assert";
 import prisma from "../../config/db.config";
 import { Restaurant } from "../../types/restaurant";
 
+const weekArrayFromat = (openninghour: Restaurant.time[]) => {
+  const day = ["อาทิตย์", "จันทร์", "อังคาร", "พุธ", "พฤหัส", "ศุกร์", "เสาร์"];
+  const firstday = day[openninghour[0].weekday];
+  const lastday = day[openninghour[openninghour.length - 1].weekday];
+  return {
+    day: `${firstday} - ${lastday}`,
+    time: `${openninghour[0].openTime} - ${openninghour[0].closeTime}`,
+  };
+};
+
 export default {
   getRestaurants: async (data: Restaurant.query) => {
     const { limit, page, category, sort, sortBy, search, rating, priceRate } =
@@ -78,6 +88,7 @@ export default {
       where: whereClause,
       orderBy,
       select: {
+        id: true,
         name: true,
         totalReviews: true,
         avgRating: true,
@@ -107,6 +118,7 @@ export default {
     //8. map data
     const restaurant = restaurantInfo.map((data) => {
       return {
+        id: data.id,
         name: data.name,
         totalReviews: data.totalReviews,
         avgRating: data.avgRating,
@@ -127,28 +139,124 @@ export default {
   createRestaurant: async (
     information: Restaurant.information,
     price: Restaurant.price,
-    time: Restaurant.time
+    time: any
   ) => {
+    const availableTime: Restaurant.time[] = [];
+    const [start, stop] = time.weekday.split("-").map(Number);
+
+    for (let i = start; i < stop + 1; i++) {
+      availableTime.push({
+        weekday: i,
+        openTime: time.openTime,
+        closeTime: time.closeTime,
+      });
+    }
+
     const restaurant = await prisma.$transaction(async (tx) => {
-      await tx.restaurant.create({
+      const newRestaurant = await tx.restaurant.create({
         data: {
           name: information.name,
           description: information.description,
           address: information.address,
-          latitude: information.latitude,
-          longitude: information.longitude,
           minPrice: price.minPrice,
           maxPrice: price.maxPrice,
-
-          openninghour: {
+          contact: {
             create: {
-              openTime: time.opentime,
-              closeTime: time.closetime,
-              weekday: time.weekday,
+              contactType: "Number",
+              contactDetail: "0807195642",
             },
           },
         },
       });
+
+      await tx.openingHour.createMany({
+        data: availableTime.map((t) => ({
+          weekday: t.weekday,
+          openTime: t.openTime,
+          closeTime: t.closeTime,
+          restaurantId: newRestaurant.id,
+        })),
+      });
     });
+    return;
+  },
+
+  Information: async (id: string) => {
+    //1. query restaurant data
+    const information = await prisma.restaurant.findFirst({
+      where: {
+        id,
+      },
+      select: {
+        name: true,
+        description: true,
+        status: true,
+        address: true,
+        latitude: true,
+        longitude: true,
+        minPrice: true,
+        maxPrice: true,
+        images: {
+          select: {
+            imageUrl: true,
+          },
+        },
+        openninghour: {
+          take: 7,
+          select: {
+            weekday: true,
+            openTime: true,
+            closeTime: true,
+          },
+        },
+        restaurantServices: {
+          select: {
+            service: {
+              select: {
+                service: true,
+              },
+            },
+          },
+        },
+        contact: {
+          select: {
+            contactDetail: true,
+            contactType: true,
+          },
+        },
+      },
+    });
+
+    if (!information) {
+      return false;
+    }
+
+    //2. map open hour
+    const openingHour = weekArrayFromat(
+      information?.openninghour as Restaurant.time[]
+    );
+
+    //map all data
+    const restaurantInformation = {
+      name: information.name,
+      description: information.description,
+      address: information.address,
+      latitude: information.latitude,
+      logitude: information.longitude,
+      status: information.status,
+      minPrice: information.minPrice,
+      maxPrice: information.maxPrice,
+      image: information.images.map((image) => image.imageUrl),
+      openingHour,
+      contact: {
+        contactType: information.contact[0].contactType,
+        contactDetail: information.contact[0].contactDetail,
+      },
+      services: information.restaurantServices.map(
+        (service) => service.service.service
+      ),
+    };
+
+    return restaurantInformation;
   },
 };

@@ -82,17 +82,18 @@ const RestaurantDetailPage = async ({
 }) => {
   const { id } = await params;
 
-  // const restaurant = await getRestaurantById(id);
+  const { restaurantInfo } = await getRestaurantById(id);
+  const restaurant = restaurantInfo;
 
-  // console.log(restaurant);
+  console.log(restaurant);
 
   return (
     <div className="flex flex-col gap-4 pt-4">
       {/* <div className="grid grid-cols-2 gap-2 px-4">
         <div className="relative border border-border h-80 rounded-xl md:h-96">
           <Image
-            src={restaurantInfo.image[0]}
-            alt={restaurantInfo.name}
+            src={restaurant.image[0]}
+            alt={restaurant.name}
             fill
             objectFit="cover"
             className="rounded-xl"
@@ -100,8 +101,8 @@ const RestaurantDetailPage = async ({
         </div>
         <div className="relative border border-border h-80 rounded-xl md:h-96">
           <Image
-            src={restaurantInfo.image[1]}
-            alt={restaurantInfo.name}
+            src={restaurant.image[1]}
+            alt={restaurant.name}
             fill
             objectFit="cover"
             className="rounded-xl"
@@ -113,31 +114,31 @@ const RestaurantDetailPage = async ({
       <div className="grid grid-cols-2 grid-rows-2 gap-2 px-4 md:px-8">
         <Card className="col-span-2 md:col-span-1">
           <CardHeader>
-            <CardTitle>{restaurantInfo.name}</CardTitle>
+            <CardTitle>{restaurant.name}</CardTitle>
           </CardHeader>
-          <CardContent>{restaurantInfo.description}</CardContent>
-          <CardFooter>{restaurantInfo.status}</CardFooter>
+          <CardContent>{restaurant.description}</CardContent>
+          <CardFooter>{restaurant.status}</CardFooter>
         </Card>
 
         <Card className="col-span-2 md:col-span-1 md:row-span-2">
           <CardContent className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
               <h1>เวลาเปิด</h1>
-              <p>{restaurantInfo.openingHour.day}</p>
-              <p>{restaurantInfo.openingHour.time}</p>
+              <p>{restaurant.openingHour.day}</p>
+              <p>{restaurant.openingHour.time}</p>
             </div>
             <div>
               <h1>ช่วงราคา</h1>
               <p>
-                {restaurantInfo.minPrice} - {restaurantInfo.maxPrice} บาท
+                {restaurant.minPrice} - {restaurant.maxPrice} บาท
               </p>
             </div>
-            {restaurantInfo.services.map((service) => (
+            {/* {restaurant.services.map((service) => (
               <div className="flex items-center gap-2" key={service}>
                 <BadgeCheck />
                 {service}
               </div>
-            ))}
+            ))} */}
           </CardContent>
         </Card>
 
