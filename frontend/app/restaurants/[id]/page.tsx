@@ -9,7 +9,28 @@ import { Separator } from "@/components/ui/separator";
 import { BadgeCheck } from "lucide-react";
 
 import Image from "next/image";
-import Link from "next/link";
+import RestaurantImagesCarousel from "@/components/restaurant-detail/RestaurantImagesCarousel";
+
+export type RestaurantInfoProps = {
+  name: string;
+  description: string;
+  address: string;
+  latitude: string;
+  logitude: string;
+  status: string;
+  minPrice: string;
+  maxPrice: string;
+  image: string[];
+  openingHour: {
+    day: string;
+    time: string;
+  };
+  contact: {
+    contactType: string;
+    contactDetail: string;
+  };
+  services: string[];
+};
 
 const restaurantInfo = {
   name: "Dib lamun cafe",
@@ -38,13 +59,20 @@ const restaurantInfo = {
 };
 
 // const getRestaurantById = async (id: string) => {
-//   const res = await fetch(
-//     `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get/${id}`,
-//     {
-//       credentials: "include",
-//     },
-//   );
-//   return res.json();
+//   try {
+//     const res = await fetch(
+//       `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get/${id}`,
+//       {
+//         credentials: "include",
+//       },
+//     );
+//     if (!res.ok) {
+//       throw new Error("Failed to fetch restaurant" + res.status);
+//     }
+//     return res.json();
+//   } catch (error) {
+//     throw new Error("Failed to fetch restaurant" + error);
+//   }
 // };
 
 const RestaurantDetailPage = async ({
@@ -59,8 +87,8 @@ const RestaurantDetailPage = async ({
   // console.log(restaurant);
 
   return (
-    <div className="flex flex-col gap-4 pt-4 md:pt-8">
-      <div className="grid grid-cols-2 gap-2 px-0">
+    <div className="flex flex-col gap-4 pt-4">
+      {/* <div className="grid grid-cols-2 gap-2 px-4">
         <div className="relative border border-border h-80 rounded-xl md:h-96">
           <Image
             src={restaurantInfo.image[0]}
@@ -79,10 +107,11 @@ const RestaurantDetailPage = async ({
             className="rounded-xl"
           />
         </div>
-      </div>
+      </div> */}
+      <RestaurantImagesCarousel restaurantInfo={restaurantInfo} />
 
       <div className="grid grid-cols-2 grid-rows-2 gap-2 px-4 md:px-8">
-        <Card className="col-span-1">
+        <Card className="col-span-2 md:col-span-1">
           <CardHeader>
             <CardTitle>{restaurantInfo.name}</CardTitle>
           </CardHeader>
@@ -90,7 +119,7 @@ const RestaurantDetailPage = async ({
           <CardFooter>{restaurantInfo.status}</CardFooter>
         </Card>
 
-        <Card className="col-span-1 row-span-2">
+        <Card className="col-span-2 md:col-span-1 md:row-span-2">
           <CardContent className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
               <h1>เวลาเปิด</h1>
@@ -112,22 +141,30 @@ const RestaurantDetailPage = async ({
           </CardContent>
         </Card>
 
-        <Card className="col-span-1">
-          <CardContent className="flex flex-col items-center gap-4 lg:flex-row lg:items-start">
-            <Link
-              href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.logitude}`}
-            >
-              <div className="border border-border h-60 min-w-60 rounded-xl">
-                Map
+        {restaurantInfo.address && (
+          <Card className="flex items-center justify-center col-span-2 md:col-span-1">
+            <CardContent className="flex flex-col gap-4 md:flex-row">
+              <a
+                href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.logitude}`}
+                target="_blank"
+              >
+                <div className="relative mx-auto border border-border h-30 w-30 rounded-xl">
+                  <Image
+                    src="/google-map.webp"
+                    alt="map"
+                    fill
+                    className="object-cover rounded-xl"
+                  />
+                </div>
+              </a>
+              <div className="flex flex-col w-full gap-2">
+                <p>{restaurantInfo.address}</p>
+                <Separator />
+                <p>{restaurantInfo.contact.contactDetail}</p>
               </div>
-            </Link>
-            <div className="flex flex-col w-full gap-2">
-              <p>{restaurantInfo.address}</p>
-              <Separator />
-              <p>{restaurantInfo.contact.contactDetail}</p>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -109,7 +109,7 @@ const FilterRestaurant = () => {
         <CardContent className="flex flex-col gap-4 px-0">
           {/* Category */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Category</h1>
+            <h1 className="text-md font-semibold">Category</h1>
 
             {categoriesData.map((category) => (
               <div className="flex items-center gap-2" key={category.id}>
@@ -127,7 +127,7 @@ const FilterRestaurant = () => {
 
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Rating</h1>
+            <h1 className="text-md font-semibold">Rating</h1>
 
             {ratingsData.map((rating) => (
               <div className="flex items-center gap-2" key={rating.id}>
@@ -145,7 +145,7 @@ const FilterRestaurant = () => {
 
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Price</h1>
+            <h1 className="text-md font-semibold">Price</h1>
             {pricesData.map((price) => (
               <div className="flex items-center gap-2" key={price.id}>
                 <Checkbox
@@ -170,7 +170,7 @@ const FilterRestaurant = () => {
         <SheetContent side="top" className="py-6">
           {/* Category */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Category</h1>
+            <h1 className="text-md font-semibold">Category</h1>
             <div className="flex items-center gap-2">
               <Checkbox id="category1" />
               <Label htmlFor="category1">Category 1</Label>
@@ -185,7 +185,7 @@ const FilterRestaurant = () => {
 
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Rating</h1>
+            <h1 className="text-md font-semibold">Rating</h1>
             <div className="flex items-center gap-2">
               <Checkbox id="rating2" />
               <Label htmlFor="rating2">2.0+</Label>
@@ -201,7 +201,7 @@ const FilterRestaurant = () => {
 
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Price</h1>
+            <h1 className="text-md font-semibold">Price</h1>
             <div className="flex items-center gap-2">
               <Checkbox id="price1" />
               <Label htmlFor="price1">Price 1</Label>

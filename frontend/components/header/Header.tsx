@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Utensils } from "lucide-react";
 
 import Logo from "../Logo";
@@ -57,8 +57,24 @@ const userLogout = async () => {
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const initialSearch = searchParams.get("search") || "";
 
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+
+  const [search, setSearch] = useState<string>(initialSearch);
+
+  const handleSearch = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const params = new URLSearchParams(searchParams.toString());
+    if (search.length > 0) {
+      params.set("search", search);
+    } else {
+      params.delete("search");
+    }
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   useEffect(() => {
     const fetchUserInfo = async () => {
@@ -74,13 +90,15 @@ const Header = () => {
         <Logo width={50} height={50} />
 
         {/* Search */}
-        <form className="relative flex-1 max-w-xl">
+        <form className="relative flex-1" onSubmit={handleSearch}>
           <Search className="absolute -translate-y-1/2 top-1/2 left-2" />
           <Input
             type="text"
             placeholder="Search"
             name="search"
-            className="max-w-5xl pl-10 border rounded-full border-border focus-visible:ring-0"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 border rounded-full border-border focus-visible:ring-0"
           />
         </form>
 
