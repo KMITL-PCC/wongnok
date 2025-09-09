@@ -2,11 +2,34 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
 
-// The backend URL is correctly defined here and will be used throughout the component.
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
+const backendURL =
+  process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
-const ForgotPasswordForm = () => {
+// ปรับ endpoint ให้ตรงกับ back ของคุณ
+const CSRF_ENDPOINT = `${backendURL}/csrf-token`;
+const SEND_OTP_ENDPOINT = `${backendURL}/auth/forgotPass`;
+const VERIFY_OTP_ENDPOINT = `${backendURL}/auth/verify-otp`;
+const RESEND_OTP_ENDPOINT = `${backendURL}/auth/resend-otp`;
+const RESET_PASS_ENDPOINT = `${backendURL}/auth/reset-password`;
+
+export default function ForgotPasswordForm() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // ✅ รับต้นทางและปลายทางจาก query
+  const fromParam = (searchParams.get("from") || "").toLowerCase(); // "edit" | "login" | ""
+  const returnParam = searchParams.get("return") || ""; // path ปลายทาง
+  const cameFromEdit =
+    fromParam === "edit" || returnParam.includes("/editprofile");
+  const cameFromLogin = fromParam === "login" || returnParam === "/login";
+
+  // คำนวณลิงก์ย้อนกลับ
+  const backToEditHref =
+    returnParam && cameFromEdit ? returnParam : "/editprofile?tab=password";
+  const backToLoginHref = returnParam && cameFromLogin ? returnParam : "/login";
+
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error">("error");
@@ -23,50 +46,50 @@ const ForgotPasswordForm = () => {
 
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
-  // Hide message after 3s
+  // พรีฟิลด์ email จาก query (?email=...)
   useEffect(() => {
-    if (message) {
-      const timer = setTimeout(() => {
-        setMessage("");
-      }, 3000);
-      return () => clearTimeout(timer);
-    }
+    const qEmail = searchParams.get("email");
+    if (qEmail) setEmail(qEmail);
+  }, [searchParams]);
+
+  // ซ่อนข้อความอัตโนมัติ
+  useEffect(() => {
+    if (!message) return;
+    const timer = setTimeout(() => setMessage(""), 3000);
+    return () => clearTimeout(timer);
   }, [message]);
 
-  // Fetch CSRF token on mount
+  // ดึง CSRF token
   useEffect(() => {
-    const fetchCsrfToken = async () => {
+    (async () => {
       try {
-        const response = await fetch(`${backendURL}/api/csrf-token`, {
-          credentials: "include",
-        });
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setCsrfToken(data.csrfToken);
-        console.log("CSRF Token fetched successfully.");
-      } catch (error) {
-        console.error("Failed to fetch CSRF token:", error);
+        const res = await fetch(CSRF_ENDPOINT, { credentials: "include" });
+        if (!res.ok) throw new Error("Failed to fetch CSRF");
+        const data = await res.json();
+        setCsrfToken(data?.csrfToken || null);
+      } catch (err) {
+        console.error(err);
         setMessage("Connection error. Please try again later.");
         setMessageType("error");
       }
-    };
-    fetchCsrfToken();
+    })();
   }, []);
 
-  // Countdown
+  // countdown resend
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    if (countdown > 0) {
-      timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-    }
-    return () => clearTimeout(timer);
+    if (countdown <= 0) return;
+    const t = setTimeout(() => setCountdown((c) => c - 1), 1000);
+    return () => clearTimeout(t);
   }, [countdown]);
 
-  // Submit email
-  const handleEmailSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const headersJson = (token: string | null) => ({
+    "Content-Type": "application/json",
+    "X-CSRF-Token": token || "",
+  });
+
+  // STEP 1: ส่งอีเมลเพื่อรับ OTP
+  const handleEmailSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
 
     if (!csrfToken) {
@@ -75,7 +98,6 @@ const ForgotPasswordForm = () => {
       setIsLoading(false);
       return;
     }
-
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
       setMessage("Please enter a valid email address.");
       setMessageType("error");
@@ -84,83 +106,61 @@ const ForgotPasswordForm = () => {
     }
 
     try {
-      const response = await fetch(`${backendURL}/auth/forgotPass`, {
+      const res = await fetch(SEND_OTP_ENDPOINT, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "CSRF-Token": csrfToken,
-        },
+        headers: headersJson(csrfToken),
         body: JSON.stringify({ email }),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to send reset link.");
-      }
-
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Failed to send code.");
       setFormStep("otp");
-      setMessage(data.message || `A 5-digit code has been sent to ${email}.`);
+      setMessage(data?.message || `A 5-digit code has been sent to ${email}.`);
       setMessageType("success");
       setCountdown(50);
-    } catch (error: any) {
-      setMessage(error.message || "An unexpected error occurred.");
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to send code.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Submit OTP
-  const handleOtpSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  // STEP 2: ยืนยัน OTP
+  const handleOtpSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
 
-    if (otp.length !== 5 || !/^\d{5}$/.test(otp)) {
+    if (!/^\d{5}$/.test(otp)) {
       setMessage("Please enter a valid 5-digit OTP.");
-      setMessageType("error");
-      setIsLoading(false);
-      return;
-    }
-    if (!csrfToken) {
-      setMessage("Security token is missing. Please refresh the page.");
       setMessageType("error");
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(`${backendURL}/auth/verify-otp`, {
+      const res = await fetch(VERIFY_OTP_ENDPOINT, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({ otp }),
+        headers: headersJson(csrfToken),
+        body: JSON.stringify({ email, otp }),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Invalid OTP.");
-      }
-
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Invalid OTP.");
       setFormStep("resetPassword");
       setMessage("OTP verified. Please set your new password.");
       setMessageType("success");
-    } catch (error: any) {
-      setMessage(error.message || "Invalid OTP. Please try again.");
+    } catch (err: any) {
+      setMessage(err?.message || "Invalid OTP. Please try again.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Submit new password
-  const handlePasswordSubmit = async (
-    event: React.FormEvent<HTMLFormElement>,
-  ) => {
-    event.preventDefault();
+  // STEP 3: ตั้งรหัสใหม่ → เสร็จแล้ว “กลับตามที่มา”
+  const handlePasswordSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsLoading(true);
 
     if (!password || password !== confirmPassword || password.length < 8) {
@@ -169,100 +169,99 @@ const ForgotPasswordForm = () => {
       setIsLoading(false);
       return;
     }
-    if (!csrfToken) {
-      setMessage("Security token is missing. Please refresh the page.");
-      setMessageType("error");
-      setIsLoading(false);
-      return;
-    }
 
     try {
-      const response = await fetch(`${backendURL}/auth/reset-password`, {
+      const res = await fetch(RESET_PASS_ENDPOINT, {
         method: "PATCH",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "CSRF-Token": csrfToken,
-        },
-        body: JSON.stringify({ newPassword: password }),
+        headers: headersJson(csrfToken),
+        body: JSON.stringify({ email, newPassword: password }),
       });
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data?.message || "Failed to reset password.");
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to reset password.");
-      }
-
-      setMessage(
-        "Password has been reset successfully! Redirecting to login...",
-      );
+      setMessage("Password has been reset successfully!");
       setMessageType("success");
 
-      setTimeout(() => {
-        window.location.href = "/login";
-      }, 2000);
-    } catch (error: any) {
-      setMessage(
-        error.message || "Failed to reset password. Please try again.",
-      );
+      // ✅ เลือกกลับตามที่มา
+      const dest = cameFromEdit
+        ? backToEditHref
+        : cameFromLogin
+          ? backToLoginHref
+          : "/login"; // fallback
+
+      setTimeout(() => router.push(dest), 1000);
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to reset password. Please try again.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Resend OTP
   const handleResendOtp = async () => {
     if (countdown > 0) return;
-
     setIsLoading(true);
     setMessage("");
-    if (!csrfToken) {
-      setMessage("Security token is missing. Please refresh the page.");
-      setMessageType("error");
-      setIsLoading(false);
-      return;
-    }
-
     try {
-      const response = await fetch(`${backendURL}/auth/resend-otp`, {
+      const res = await fetch(RESEND_OTP_ENDPOINT, {
         method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          "CSRF-Token": csrfToken,
-        },
+        headers: headersJson(csrfToken),
         body: JSON.stringify({ email }),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to resend code.");
-      }
-
-      setMessage(data.message || "A new code has been sent.");
+      const data = await res.json();
+      if (!res.ok) throw new Error(data?.message || "Failed to resend code.");
+      setMessage(data?.message || "A new code has been sent.");
       setMessageType("success");
       setCountdown(50);
-    } catch (error: any) {
-      setMessage(error.message || "Failed to resend code.");
+    } catch (err: any) {
+      setMessage(err?.message || "Failed to resend code.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Back to email step
-  const handleBackToEmail = () => {
-    setFormStep("email");
-    setMessage("");
-    setOtp("");
+  // ✅ ปุ่มย้อนกลับ “ปุ่มเดียวตามต้นทาง”
+  const BackLinks = () => {
+    if (cameFromEdit) {
+      return (
+        <button
+          type="button"
+          onClick={() => router.push(backToEditHref)}
+          className="mt-2 inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+        >
+          ← Back to Edit profile
+        </button>
+      );
+    }
+    if (cameFromLogin) {
+      return (
+        <button
+          type="button"
+          onClick={() => router.push(backToLoginHref)}
+          className="mt-2 inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
+        >
+          ← Back to Login
+        </button>
+      );
+    }
+    // ไม่รู้ว่ามาจากไหน → ไม่แสดงปุ่ม
+    return null;
   };
 
   return (
-    <div className="relative flex flex-col items-center justify-center min-h-screen p-10 pb-64 font-sans bg-gray-50">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gray-50 p-10 pb-64 font-sans">
       {/* Popup Message */}
       {message && (
         <div
-          className={`absolute top-20 rounded-md px-4 py-3 text-sm font-medium ${messageType === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
+          className={`absolute top-20 rounded-md px-4 py-3 text-sm font-medium ${
+            messageType === "success"
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
         >
           {message}
         </div>
@@ -276,7 +275,7 @@ const ForgotPasswordForm = () => {
               Forgot Password?
             </h1>
             <p className="mt-2 text-sm text-gray-600">
-              Enter your email to receive a reset link.
+              Enter your email to receive a reset code.
             </p>
           </div>
           <form onSubmit={handleEmailSubmit} className="space-y-6">
@@ -293,26 +292,19 @@ const ForgotPasswordForm = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="Your Email"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading || !csrfToken}
-              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="w-full justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-green-400"
             >
-              {isLoading ? "Sending..." : "Send Reset Link"}
+              {isLoading ? "Sending..." : "Send Code"}
             </button>
-
-            {/* Text link back to Login */}
             <div className="text-center">
-              <Link
-                href="/login"
-                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
-              >
-                ← Back to Login
-              </Link>
+              <BackLinks />
             </div>
           </form>
         </div>
@@ -352,25 +344,18 @@ const ForgotPasswordForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="w-full justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-green-400"
             >
               {isLoading ? "Verifying..." : "Verify Code"}
             </button>
-
-            {/* Text link back to Login */}
             <div className="text-center">
-              <Link
-                href="/login"
-                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
-              >
-                ← Back to Login
-              </Link>
+              <BackLinks />
             </div>
           </form>
 
-          <div className="mt-6 space-y-4 text-sm text-center">
+          <div className="mt-6 space-y-4 text-center text-sm">
             <p className="text-gray-600">
-              Didn't receive the code?{" "}
+              Didn&apos;t receive the code?{" "}
               {countdown > 0 ? (
                 <span className="font-medium text-gray-400">
                   You can resend in {countdown}s
@@ -386,12 +371,6 @@ const ForgotPasswordForm = () => {
                 </button>
               )}
             </p>
-            <button
-              onClick={handleBackToEmail}
-              className="font-medium text-gray-700 hover:text-gray-900"
-            >
-              &larr; Use a different email
-            </button>
           </div>
         </div>
       )}
@@ -420,7 +399,7 @@ const ForgotPasswordForm = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="New Password"
               />
             </div>
@@ -436,32 +415,23 @@ const ForgotPasswordForm = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
-                className="w-full px-3 py-2 placeholder-gray-400 transition bg-white border border-gray-300 rounded-md shadow-sm focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 placeholder-gray-400 shadow-sm transition focus:border-green-500 focus:ring-1 focus:ring-green-500 focus:outline-none disabled:bg-gray-50"
                 placeholder="Confirm New Password"
               />
             </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="justify-center w-full px-4 py-2 text-sm font-medium text-white transition bg-green-600 border border-transparent rounded-md shadow-sm hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:bg-green-400"
+              className="w-full justify-center rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-green-700 focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:cursor-not-allowed disabled:bg-green-400"
             >
               {isLoading ? "Saving..." : "Reset Password"}
             </button>
-
-            {/* Text link back to Login */}
             <div className="text-center">
-              <Link
-                href="/login"
-                className="inline-block text-sm font-medium text-gray-600 hover:text-gray-900 hover:underline"
-              >
-                ← Back to Login
-              </Link>
+              <BackLinks />
             </div>
           </form>
         </div>
       )}
     </div>
   );
-};
-
-export default ForgotPasswordForm;
+}

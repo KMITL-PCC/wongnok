@@ -1,11 +1,12 @@
 "use client";
 
 import Image from "next/image";
-import React from "react";
-import useSWR from "swr";
+import React, { useEffect } from "react";
+import useSWR, { useSWRConfig } from "swr";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
@@ -18,15 +19,42 @@ const fetcher = async (url: string) => {
 };
 
 const ProfileForm = () => {
+  const { mutate } = useSWRConfig();
+  const searchParams = useSearchParams();
+
   const { data, isLoading, error } = useSWR(PROFILE_ENDPOINT, fetcher, {
     revalidateOnFocus: true,
   });
 
-  const fullName = data
-    ? `${data.firstName ?? ""} ${data.lastName ?? ""}`.trim()
-    : "";
-  const email = data?.email ?? "unknown@example.com";
+  // 👇 ถ้ามี ?updated=1 ให้ revalidate ทันที
+  useEffect(() => {
+    if (searchParams.get("updated") === "1") {
+      mutate(PROFILE_ENDPOINT);
+    }
+  }, [searchParams, mutate]);
+
+  // 👇 ฟังสัญญาณ BroadcastChannel จากหน้า Edit
+  useEffect(() => {
+    if (typeof window === "undefined" || !("BroadcastChannel" in window))
+      return;
+    const ch = new BroadcastChannel("profile-updated");
+    ch.onmessage = () => {
+      mutate(PROFILE_ENDPOINT);
+    };
+    return () => ch.close();
+  }, [mutate]);
+
+  // เตรียมข้อมูลจาก backend
+  const firstName = data?.firstName?.trim?.() || "";
+  const lastName = data?.lastName?.trim?.() || "";
+  const username = data?.username?.trim?.() || "";
+  const email = data?.email || "unknown@example.com";
   const avatarUrl = data?.avatarUrl || "/user.png";
+
+  const displayName =
+    firstName || lastName
+      ? `${firstName} ${lastName}`.trim()
+      : username || "Unnamed User";
 
   return (
     <div className="to-muted/50 min-h-screen bg-gradient-to-b from-white">
@@ -39,9 +67,7 @@ const ProfileForm = () => {
               fill
               className="rounded-full object-cover"
               sizes="120px"
-              // NOTE: ถ้า avatarUrl เป็นโดเมนอื่น เช่น http://localhost:3001/...
-              // ต้องอนุญาตโดเมนนั้นใน next.config.js -> images.remotePatterns
-              // มิฉะนั้นให้ใช้ <img> ธรรมดาแทน
+              // NOTE: ถ้า avatarUrl เป็นโดเมนภายนอก ต้องอนุญาตใน next.config.js (images.remotePatterns)
             />
           </div>
 
@@ -58,10 +84,17 @@ const ProfileForm = () => {
               </>
             ) : (
               <>
-                <p className="truncate text-lg font-semibold">
-                  {fullName || "Unnamed User"}
+                <p className="truncate text-lg font-semibold">{displayName}</p>
+
+                {username && displayName !== username && (
+                  <p className="text-muted-foreground truncate text-sm">
+                    @{username}
+                  </p>
+                )}
+
+                <p className="text-muted-foreground truncate text-sm">
+                  Email : {email}
                 </p>
-                <p className="text-muted-foreground text-sm">Email : {email}</p>
               </>
             )}
           </div>

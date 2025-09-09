@@ -16,6 +16,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Upload, Trash2, Save, User, Lock } from "lucide-react";
 import Link from "next/link";
+import { useSearchParams, useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 const backendURL =
   process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
@@ -24,42 +26,95 @@ const PASSWORD_ENDPOINT = `${backendURL}/password`;
 const CSRF_ENDPOINT = `${backendURL}/csrf-token`;
 
 export default function EditProfilePage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const defaultTab =
+    (searchParams.get("tab") as "profile" | "password") ?? "profile";
+
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
+  // Avatar
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  const [firstName, setFirstName] = useState("Jane");
-  const [lastName, setLastName] = useState("Doe");
+  // Profile
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [savingProfile, setSavingProfile] = useState(false);
 
+  // Change password
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-
-  const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
 
-  // ✅ ดึง CSRF Token ตอน mount
+  // === CSRF ===
   useEffect(() => {
-    async function fetchToken() {
+    (async () => {
       try {
         const res = await fetch(CSRF_ENDPOINT, {
           method: "GET",
-          credentials: "include", // สำคัญเพื่อส่ง cookie
+          credentials: "include",
         });
+        if (!res.ok) {
+          toast.error("Security token error", {
+            description: "Could not establish a secure session.",
+          });
+          return;
+        }
         const data = await res.json();
-        setCsrfToken(data.csrfToken);
+        setCsrfToken(data?.csrfToken || null);
       } catch (err) {
-        console.error("Failed to fetch CSRF token", err);
+        console.error("CSRF error:", err);
+        toast.error("Connection Error", {
+          description: "Could not connect to the server for security setup.",
+        });
       }
-    }
-    fetchToken();
+    })();
   }, []);
 
+  // === Load profile ===
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(PROFILE_ENDPOINT, {
+          method: "GET",
+          credentials: "include",
+        });
+        if (!res.ok) {
+          const msg = await pickError(res, "Failed to load profile");
+          toast.error("Connection Error", { description: msg });
+          return;
+        }
+        const data = await res.json();
+        setFirstName(data?.firstName ?? "");
+        setLastName(data?.lastName ?? "");
+        if (data?.avatarUrl) setAvatarPreview(data.avatarUrl);
+      } catch (err) {
+        console.error("Fetch profile error:", err);
+        toast.error("Connection Error", {
+          description: "Unable to fetch your profile. Please try again.",
+        });
+      }
+    })();
+  }, []);
+
+  // ===== Profile upload/preview =====
   function onUploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // จำกัดไฟล์ ≤ 2MB
+    const MAX_SIZE = 2 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      toast.error("Image too large", {
+        description: "Please select an image smaller than 2MB.",
+      });
+      if (e.target) e.target.value = "";
+      return;
+    }
+
     setAvatarFile(file);
     const reader = new FileReader();
     reader.onload = (ev) => setAvatarPreview(String(ev.target?.result || ""));
@@ -69,11 +124,14 @@ export default function EditProfilePage() {
   async function onSaveProfile(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!csrfToken) {
-      alert("Missing CSRF token");
+      toast.error("Session not ready", {
+        description: "Please wait a moment and try again.",
+      });
       return;
     }
     try {
       setSavingProfile(true);
+      toast.info("Saving profile...");
 
       const form = new FormData();
       form.set("firstName", firstName);
@@ -83,33 +141,62 @@ export default function EditProfilePage() {
       const res = await fetch(PROFILE_ENDPOINT, {
         method: "POST",
         body: form,
-        headers: {
-          "X-CSRF-Token": csrfToken,
-        },
+        headers: { "X-CSRF-Token": csrfToken },
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error("Failed to save profile");
+      if (!res.ok) {
+        const msg = await pickError(res, "Failed to save profile");
+        toast.error("Save failed", { description: msg });
+        return;
+      }
       const data = await res.json();
-      alert(data.message || "Profile saved!");
+      toast.success("Profile saved", {
+        description: data.message || "Your changes have been updated.",
+      });
+
+      // ถ้า backend ส่ง avatarUrl ใหม่มา ให้ใช้
+      if (data?.avatarUrl) setAvatarPreview(data.avatarUrl);
+      // reset file input
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      setAvatarFile(null);
+
+      // ✅ แจ้งหน้าอื่นว่ามีการอัปเดต + กลับหน้าโปรไฟล์พร้อม query
+      if (typeof window !== "undefined" && "BroadcastChannel" in window) {
+        const ch = new BroadcastChannel("profile-updated");
+        ch.postMessage({ ts: Date.now() });
+        ch.close();
+      }
+      router.push("/profile?updated=1");
+    } catch (e: any) {
+      console.error("Save profile error:", e);
+      toast.error("Connection Error", {
+        description: "Unable to save profile. Please try again.",
+      });
     } finally {
       setSavingProfile(false);
     }
   }
 
+  // ===== Change password (with current) =====
   async function onSavePassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!csrfToken) {
-      alert("Missing CSRF token");
+      toast.error("Session not ready", {
+        description: "Please wait a moment and try again.",
+      });
       return;
     }
     if (newPassword !== confirmPassword) {
-      alert("Password confirmation does not match");
+      toast.error("Password mismatch", {
+        description: "Confirmation does not match the new password.",
+      });
       return;
     }
 
     try {
       setSavingPassword(true);
+      toast.info("Updating password...");
 
       const res = await fetch(PASSWORD_ENDPOINT, {
         method: "POST",
@@ -121,9 +208,23 @@ export default function EditProfilePage() {
         body: JSON.stringify({ currentPassword, newPassword }),
       });
 
-      if (!res.ok) throw new Error("Failed to update password");
+      if (!res.ok) {
+        const msg = await pickError(res, "Failed to update password");
+        toast.error("Update failed", { description: msg });
+        return;
+      }
       const data = await res.json();
-      alert(data.message || "Password updated!");
+      toast.success("Password updated", {
+        description: data.message || "Your password has been changed.",
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (e: any) {
+      console.error("Update password error:", e);
+      toast.error("Connection Error", {
+        description: "Unable to update password. Please try again.",
+      });
     } finally {
       setSavingPassword(false);
     }
@@ -151,7 +252,7 @@ export default function EditProfilePage() {
               type="submit"
               disabled={savingProfile}
             >
-              <Save className="h-4 w-4" />{" "}
+              <Save className="h-4 w-4" />
               {savingProfile ? "Saving..." : "Save changes"}
             </Button>
           </div>
@@ -160,15 +261,15 @@ export default function EditProfilePage() {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-8">
-        <Tabs defaultValue="profile" className="space-y-6">
+        <Tabs defaultValue={defaultTab} className="space-y-6">
           <TabsList>
             <TabsTrigger value="profile">
               <User className="mr-2 h-4 w-4" />
               Profile
             </TabsTrigger>
-            <TabsTrigger value="security">
+            <TabsTrigger value="password">
               <Lock className="mr-2 h-4 w-4" />
-              Security
+              Password
             </TabsTrigger>
           </TabsList>
 
@@ -195,7 +296,10 @@ export default function EditProfilePage() {
                         ) : (
                           <AvatarImage src="/placeholder.svg" alt="avatar" />
                         )}
-                        <AvatarFallback>JD</AvatarFallback>
+                        <AvatarFallback>
+                          {(firstName?.[0] || "").toUpperCase()}
+                          {(lastName?.[0] || "").toUpperCase()}
+                        </AvatarFallback>
                       </Avatar>
                       <div className="grid grid-cols-1 gap-2">
                         <input
@@ -247,6 +351,7 @@ export default function EditProfilePage() {
                         id="firstName"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
+                        placeholder="Your first name"
                       />
                     </div>
                     <div className="space-y-2">
@@ -255,6 +360,7 @@ export default function EditProfilePage() {
                         id="lastName"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
+                        placeholder="Your last name"
                       />
                     </div>
                   </CardContent>
@@ -268,55 +374,82 @@ export default function EditProfilePage() {
             </form>
           </TabsContent>
 
-          {/* SECURITY */}
-          <TabsContent value="security">
-            <form onSubmit={onSavePassword}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Change password</CardTitle>
-                </CardHeader>
-                <CardContent className="grid gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">
-                      Confirm new password
-                    </Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter className="justify-end">
-                  <Button type="submit" disabled={savingPassword}>
-                    <Lock className="h-4 w-4" />{" "}
-                    {savingPassword ? "Updating..." : "Update password"}
-                  </Button>
-                </CardFooter>
-              </Card>
-            </form>
+          {/* PASSWORD */}
+          <TabsContent
+            value="password"
+            className="grid grid-cols-1 gap-6 lg:grid-cols-12"
+          >
+            <div className="lg:col-span-6">
+              <form onSubmit={onSavePassword}>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Change password</CardTitle>
+                    <CardDescription>
+                      Use current password to set a new one.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="grid gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">
+                        Confirm new password
+                      </Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
+                      />
+                    </div>
+                  </CardContent>
+                  <CardFooter className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <Button type="submit" disabled={savingPassword}>
+                      <Lock className="mr-2 h-4 w-4" />
+                      {savingPassword ? "Updating..." : "Update password"}
+                    </Button>
+
+                    <Link
+                      href={`/forgotpassword?from=edit&return=${encodeURIComponent(
+                        "/editprofile?tab=password",
+                      )}`}
+                      className="text-muted-foreground text-sm hover:underline"
+                    >
+                      Forgot password?
+                    </Link>
+                  </CardFooter>
+                </Card>
+              </form>
+            </div>
           </TabsContent>
         </Tabs>
       </div>
     </div>
   );
+}
+
+async function pickError(res: Response, fallback: string) {
+  try {
+    const j = await res.json();
+    return j?.message || fallback;
+  } catch {
+    const t = await res.text();
+    return t || fallback;
+  }
 }
