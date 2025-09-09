@@ -1,7 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 
-import restaurantControlles from "./restaurant.controllers";
+import restaurantControllers from "./restaurant.controllers";
 
 const router = Router();
 
@@ -11,9 +11,9 @@ const upload = multer({ storage });
 router.post(
   "/create",
   upload.array("images", 4),
-  restaurantControlles.createRestaurant
+  restaurantControllers.createRestaurant
 );
-router.get("/get", restaurantControlles.getRestaurants);
-router.get("/get/:id", restaurantControlles.getInformation);
+router.get("/get", restaurantControllers.getRestaurants);
+router.get("/get/:id", restaurantControllers.getInformation);
 
 export default router;
