@@ -38,9 +38,8 @@ export default function EditProfilePage() {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Profile
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  // Profile (เปลี่ยนมาใช้ username)
+  const [username, setUsername] = useState("");
   const [savingProfile, setSavingProfile] = useState(false);
 
   // Change password
@@ -88,8 +87,7 @@ export default function EditProfilePage() {
           return;
         }
         const data = await res.json();
-        setFirstName(data?.firstName ?? "");
-        setLastName(data?.lastName ?? "");
+        setUsername(data?.username ?? "");
         if (data?.avatarUrl) setAvatarPreview(data.avatarUrl);
       } catch (err) {
         console.error("Fetch profile error:", err);
@@ -116,6 +114,8 @@ export default function EditProfilePage() {
     }
 
     setAvatarFile(file);
+
+    // แสดงตัวอย่างทันทีด้วย Data URL
     const reader = new FileReader();
     reader.onload = (ev) => setAvatarPreview(String(ev.target?.result || ""));
     reader.readAsDataURL(file);
@@ -134,8 +134,7 @@ export default function EditProfilePage() {
       toast.info("Saving profile...");
 
       const form = new FormData();
-      form.set("firstName", firstName);
-      form.set("lastName", lastName);
+      form.set("username", username);
       if (avatarFile) form.set("avatar", avatarFile);
 
       const res = await fetch(PROFILE_ENDPOINT, {
@@ -155,13 +154,11 @@ export default function EditProfilePage() {
         description: data.message || "Your changes have been updated.",
       });
 
-      // ถ้า backend ส่ง avatarUrl ใหม่มา ให้ใช้
-      if (data?.avatarUrl) setAvatarPreview(data.avatarUrl);
-      // reset file input
+      if (data?.avatarUrl) setAvatarPreview(data.avatarUrl); // ใช้รูปใหม่จาก backend
       if (fileInputRef.current) fileInputRef.current.value = "";
       setAvatarFile(null);
 
-      // ✅ แจ้งหน้าอื่นว่ามีการอัปเดต + กลับหน้าโปรไฟล์พร้อม query
+      // Broadcast ให้หน้าอื่นรู้ว่ามีการอัปเดต
       if (typeof window !== "undefined" && "BroadcastChannel" in window) {
         const ch = new BroadcastChannel("profile-updated");
         ch.postMessage({ ts: Date.now() });
@@ -297,8 +294,7 @@ export default function EditProfilePage() {
                           <AvatarImage src="/placeholder.svg" alt="avatar" />
                         )}
                         <AvatarFallback>
-                          {(firstName?.[0] || "").toUpperCase()}
-                          {(lastName?.[0] || "").toUpperCase()}
+                          {(username?.[0] || "").toUpperCase()}
                         </AvatarFallback>
                       </Avatar>
                       <div className="grid grid-cols-1 gap-2">
@@ -339,28 +335,19 @@ export default function EditProfilePage() {
               <div className="space-y-6 lg:col-span-7">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Personal info</CardTitle>
+                    <CardTitle>Account</CardTitle>
                     <CardDescription>
-                      Basic information about you.
+                      Basic account information.
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="firstName">First name</Label>
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="username">Username</Label>
                       <Input
-                        id="firstName"
-                        value={firstName}
-                        onChange={(e) => setFirstName(e.target.value)}
-                        placeholder="Your first name"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="lastName">Last name</Label>
-                      <Input
-                        id="lastName"
-                        value={lastName}
-                        onChange={(e) => setLastName(e.target.value)}
-                        placeholder="Your last name"
+                        id="username"
+                        value={username}
+                        onChange={(e) => setUsername(e.target.value)}
+                        placeholder="username"
                       />
                     </div>
                   </CardContent>
