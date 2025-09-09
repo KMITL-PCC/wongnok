@@ -10,29 +10,9 @@ import { BadgeCheck } from "lucide-react";
 
 import Image from "next/image";
 import RestaurantImagesCarousel from "@/components/restaurant-detail/RestaurantImagesCarousel";
+import { RestaurantInfoProps } from "@/types";
 
-export type RestaurantInfoProps = {
-  name: string;
-  description: string;
-  address: string;
-  latitude: string;
-  longitude: string;
-  status: string;
-  minPrice: string;
-  maxPrice: string;
-  image: string[];
-  openingHour: {
-    day: string;
-    time: string;
-  };
-  contact: {
-    contactType: string;
-    contactDetail: string;
-  };
-  services: string[];
-};
-
-const restaurantInfo = {
+const restaurantInfo: RestaurantInfoProps = {
   name: "Dib lamun cafe",
   description: "คาเฟ่อร่อยโดนใจ กลางคืนมีเครื่องดื่ม บรรยากาศดี",
   address: "เลขที่ 13 ตำบล ชุมโค อำเภอปะทิว ชุมพร 86160",

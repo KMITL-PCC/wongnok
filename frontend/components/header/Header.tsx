@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Utensils } from "lucide-react";
 
@@ -103,25 +103,101 @@ const Header = () => {
         </form>
 
         {/* Auth action */}
-        {/* desktop */}
-        <div className="items-center hidden gap-2 md:flex">
-          {userInfo ? (
-            // Show user info when authenticated
-            <div className="flex items-center gap-2">
-              <DropdownMenu>
-                <DropdownMenuTrigger>
-                  <User
-                    size={30}
-                    className="border rounded-full border-border"
-                  />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="mt-2">
+        <Suspense fallback={<div>Loading...</div>}>
+          {/* desktop */}
+          <div className="items-center hidden gap-2 md:flex">
+            {userInfo ? (
+              // Show user info when authenticated
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger>
+                    <User
+                      size={30}
+                      className="border rounded-full border-border"
+                    />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="mt-2">
+                    <DropdownMenuItem>
+                      <Link href="/profile" className="flex items-center gap-2">
+                        <User size={20} />
+                        <span>ข้อมูลส่วนตัว</span>
+                      </Link>
+                    </DropdownMenuItem>
+
+                    {userInfo?.user.role === "RestaurantOwner" ? (
+                      <DropdownMenuItem>
+                        <Link
+                          href="/profile"
+                          className="flex items-center gap-2"
+                        >
+                          <Utensils size={20} />
+                          <span>ร้านค้าของฉัน</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    ) : (
+                      <DropdownMenuItem>
+                        <Link
+                          href="/restaurants/create"
+                          className="flex items-center gap-2"
+                        >
+                          <Utensils size={20} />
+                          <span>สร้างร้านค้า</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuItem
+                      className="flex items-center gap-2"
+                      onClick={() => {
+                        userLogout().then(() => {
+                          setUserInfo(null);
+                          router.push("/");
+                        });
+                      }}
+                    >
+                      <LogIn size={20} />
+                      <span>ออกจากระบบ</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            ) : (
+              // Show login/register when not authenticated
+              <>
+                <Button variant="outline" className="rounded-full" asChild>
+                  <Link href="/register" className="flex items-center gap-2">
+                    <UserPlus size={20} />
+                    <span>สมัครสมาชิก</span>
+                  </Link>
+                </Button>
+
+                <Button className="rounded-full" asChild>
+                  <Link href="/login" className="flex items-center gap-2">
+                    <LogIn size={20} />
+                    <span>เข้าสู่ระบบ</span>
+                  </Link>
+                </Button>
+              </>
+            )}
+          </div>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger className="md:hidden">
+              <Menu size={20} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="mt-5">
+              {userInfo ? (
+                // Show user options when authenticated
+                <>
                   <DropdownMenuItem>
                     <Link href="/profile" className="flex items-center gap-2">
-                      <User size={20} />
+                      <User
+                        size={20}
+                        className="border rounded-full border-border"
+                      />
                       <span>ข้อมูลส่วนตัว</span>
                     </Link>
                   </DropdownMenuItem>
+                  <DropdownMenuSeparator />
 
                   {userInfo?.user.role === "RestaurantOwner" ? (
                     <DropdownMenuItem>
@@ -141,6 +217,8 @@ const Header = () => {
                       </Link>
                     </DropdownMenuItem>
                   )}
+                  <DropdownMenuSeparator />
+
                   <DropdownMenuItem
                     className="flex items-center gap-2"
                     onClick={() => {
@@ -153,101 +231,28 @@ const Header = () => {
                     <LogIn size={20} />
                     <span>ออกจากระบบ</span>
                   </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          ) : (
-            // Show login/register when not authenticated
-            <>
-              <Button variant="outline" className="rounded-full" asChild>
-                <Link href="/register" className="flex items-center gap-2">
-                  <UserPlus size={20} />
-                  <span>สมัครสมาชิก</span>
-                </Link>
-              </Button>
-
-              <Button className="rounded-full" asChild>
-                <Link href="/login" className="flex items-center gap-2">
-                  <LogIn size={20} />
-                  <span>เข้าสู่ระบบ</span>
-                </Link>
-              </Button>
-            </>
-          )}
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger className="md:hidden">
-            <Menu size={20} />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="mt-5">
-            {userInfo ? (
-              // Show user options when authenticated
-              <>
-                <DropdownMenuItem>
-                  <Link href="/profile" className="flex items-center gap-2">
-                    <User
-                      size={20}
-                      className="border rounded-full border-border"
-                    />
-                    <span>ข้อมูลส่วนตัว</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-
-                {userInfo?.user.role === "RestaurantOwner" ? (
+                </>
+              ) : (
+                // Show login/register when not authenticated
+                <>
                   <DropdownMenuItem>
-                    <Link href="/profile" className="flex items-center gap-2">
-                      <Utensils size={20} />
-                      <span>ร้านค้าของฉัน</span>
+                    <Link href="/register" className="flex items-center gap-2">
+                      <UserPlus size={20} />
+                      <span>สมัครสมาชิก</span>
                     </Link>
                   </DropdownMenuItem>
-                ) : (
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem>
-                    <Link
-                      href="/restaurants/create"
-                      className="flex items-center gap-2"
-                    >
-                      <Utensils size={20} />
-                      <span>สร้างร้านค้า</span>
+                    <Link href="/login" className="flex items-center gap-2">
+                      <LogIn size={20} />
+                      <span>เข้าสู่ระบบ</span>
                     </Link>
                   </DropdownMenuItem>
-                )}
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem
-                  className="flex items-center gap-2"
-                  onClick={() => {
-                    userLogout().then(() => {
-                      setUserInfo(null);
-                      router.push("/");
-                    });
-                  }}
-                >
-                  <LogIn size={20} />
-                  <span>ออกจากระบบ</span>
-                </DropdownMenuItem>
-              </>
-            ) : (
-              // Show login/register when not authenticated
-              <>
-                <DropdownMenuItem>
-                  <Link href="/register" className="flex items-center gap-2">
-                    <UserPlus size={20} />
-                    <span>สมัครสมาชิก</span>
-                  </Link>
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/login" className="flex items-center gap-2">
-                    <LogIn size={20} />
-                    <span>เข้าสู่ระบบ</span>
-                  </Link>
-                </DropdownMenuItem>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+                </>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </Suspense>
       </div>
     </header>
   );

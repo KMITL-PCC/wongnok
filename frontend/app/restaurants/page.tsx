@@ -1,7 +1,5 @@
 import FilterRestaurant from "@/components/restaurants/FilterRestaurant";
-import PrimaryRestaurantCard, {
-  RestaurantProps,
-} from "@/components/restaurants/PrimaryRestaurantCard.tsx";
+import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCard.tsx";
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
 import Link from "next/link";
@@ -9,6 +7,7 @@ import restaurantData from "@/mockdata/restaurant.json";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { RestaurantProps } from "@/types";
 
 const getRestaurants = async (
   search: string,
@@ -50,12 +49,6 @@ const RestaurantsPage = async ({
     prices,
   );
 
-  // console.log(restaurant);
-
-  // const restaurantSlice = restaurant
-
-  // console.log(restaurantSlice);
-
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
       {/* Filter */}
@@ -69,8 +62,9 @@ const RestaurantsPage = async ({
           <Card>
             <CardHeader>
               <CardTitle className="flex gap-2">
-                <RecommendFilterButton filter="popular" />
-                <RecommendFilterButton filter="new" />
+                {/* <RecommendFilterButton filter="popular" />
+                <RecommendFilterButton filter="new" /> */}
+                ร้านยอดนิยม
               </CardTitle>
             </CardHeader>
             <Separator />
@@ -120,10 +114,7 @@ const RestaurantsPage = async ({
             </CardHeader>
             <Separator />
             <CardContent className="grid gap-4">
-              {/* <PrimaryRestaurantCard restaurant={restaurantData[0]} />
-              <PrimaryRestaurantCard restaurant={restaurantData[1]} />
-              <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
-              {restaurant.map((restaurant: RestaurantProps) => (
+              {restaurantData.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.id}`}
                   key={restaurant.id}
