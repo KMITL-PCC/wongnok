@@ -113,6 +113,7 @@ model RestaurantImage {
   id            Int      @id @default(autoincrement()) @map("image_id")
   restaurantId  String   @map("restaurant_id") @db.VarChar(50)
   imageUrl      String   @map("image_url") @db.VarChar(2048)
+  publicId      String?   @map("public_id") @db.VarChar(50)
   description   String?  @db.VarChar(500)
   uploadedAt    DateTime @default(now()) @map("uploaded_at") @db.Timestamptz(6)
 
