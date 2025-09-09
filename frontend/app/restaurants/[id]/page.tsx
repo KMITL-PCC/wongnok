@@ -16,7 +16,7 @@ export type RestaurantInfoProps = {
   description: string;
   address: string;
   latitude: string;
-  logitude: string;
+  longitude: string;
   status: string;
   minPrice: string;
   maxPrice: string;
@@ -37,7 +37,7 @@ const restaurantInfo = {
   description: "คาเฟ่อร่อยโดนใจ กลางคืนมีเครื่องดื่ม บรรยากาศดี",
   address: "เลขที่ 13 ตำบล ชุมโค อำเภอปะทิว ชุมพร 86160",
   latitude: "10.7253421",
-  logitude: "99.3797746",
+  longitude: "99.3797746",
   status: "Closed",
   minPrice: "30",
   maxPrice: "500",
@@ -53,7 +53,7 @@ const restaurantInfo = {
   },
   contact: {
     contactType: "phone",
-    contactDetail: "950.718.8451 x3069",
+    contactDetail: "012-345-6789",
   },
   services: ["delivery"],
 };
@@ -82,10 +82,10 @@ const RestaurantDetailPage = async ({
 }) => {
   const { id } = await params;
 
-  const { restaurantInfo } = await getRestaurantById(id);
-  const restaurant = restaurantInfo;
+  // const { restaurantInfo } = await getRestaurantById(id);
+  // const restaurant = restaurantInfo;
 
-  console.log(restaurant);
+  // console.log(restaurant);
 
   return (
     <div className="flex flex-col gap-4 pt-4">
@@ -114,39 +114,39 @@ const RestaurantDetailPage = async ({
       <div className="grid grid-cols-2 grid-rows-2 gap-2 px-4 md:px-8">
         <Card className="col-span-2 md:col-span-1">
           <CardHeader>
-            <CardTitle>{restaurant.name}</CardTitle>
+            <CardTitle>{restaurantInfo.name}</CardTitle>
           </CardHeader>
-          <CardContent>{restaurant.description}</CardContent>
-          <CardFooter>{restaurant.status}</CardFooter>
+          <CardContent>{restaurantInfo.description}</CardContent>
+          <CardFooter>{restaurantInfo.status}</CardFooter>
         </Card>
 
         <Card className="col-span-2 md:col-span-1 md:row-span-2">
           <CardContent className="flex flex-col gap-2">
             <div className="flex flex-col gap-2">
               <h1>เวลาเปิด</h1>
-              <p>{restaurant.openingHour.day}</p>
-              <p>{restaurant.openingHour.time}</p>
+              <p>{restaurantInfo.openingHour.day}</p>
+              <p>{restaurantInfo.openingHour.time}</p>
             </div>
             <div>
               <h1>ช่วงราคา</h1>
               <p>
-                {restaurant.minPrice} - {restaurant.maxPrice} บาท
+                {restaurantInfo.minPrice} - {restaurantInfo.maxPrice} บาท
               </p>
             </div>
-            {/* {restaurant.services.map((service) => (
+            {restaurantInfo.services.map((service: string) => (
               <div className="flex items-center gap-2" key={service}>
                 <BadgeCheck />
                 {service}
               </div>
-            ))} */}
+            ))}
           </CardContent>
         </Card>
 
         {restaurantInfo.address && (
           <Card className="flex items-center justify-center col-span-2 md:col-span-1">
-            <CardContent className="flex flex-col gap-4 md:flex-row">
+            <CardContent className="flex flex-col items-center gap-4 md:flex-row">
               <a
-                href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.logitude}`}
+                href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.longitude}`}
                 target="_blank"
               >
                 <div className="relative mx-auto border border-border h-30 w-30 rounded-xl">
