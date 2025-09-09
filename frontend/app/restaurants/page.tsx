@@ -11,13 +11,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 const getRestaurants = async (
+  search: string,
   categories: string,
   ratings: string,
   prices: string,
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories || ""}&rating=${ratings || ""}&priceRate=${prices || ""}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?search=${search || ""}&category=${categories || ""}&rating=${ratings || ""}&price=${prices || ""}`,
     );
     if (!res.ok) {
       return { restaurant: [] };
@@ -36,14 +37,20 @@ const RestaurantsPage = async ({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
   const searchParamsData = await searchParams;
-  const { categories, ratings, prices } = searchParamsData;
+  const { categories, ratings, prices, search } = searchParamsData as {
+    categories: string;
+    ratings: string;
+    prices: string;
+    search: string;
+  };
   const { restaurant } = await getRestaurants(
-    categories as string,
-    ratings as string,
-    prices as string,
+    search,
+    categories,
+    ratings,
+    prices,
   );
 
-  console.log(restaurant);
+  // console.log(restaurant);
 
   // const restaurantSlice = restaurant
 
@@ -56,7 +63,7 @@ const RestaurantsPage = async ({
         <FilterRestaurant />
       </div>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-col flex-1 gap-4">
         {/* Recommended Restaurants */}
         <div>
           <Card>
