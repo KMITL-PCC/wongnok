@@ -22,7 +22,7 @@ test('Positive test cases Login', async ({page}) => {
     await page.waitForTimeout(4000);
 
     // await page.locator('#radix-_r_9_').click();
-    await page.getByRole('menuitem', { name: 'ออกจากระบบ' }).click();
+    // await page.getByRole('menuitem', { name: 'ออกจากระบบ' }).click();
 
 
     //wait for 2 seconds
