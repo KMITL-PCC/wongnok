@@ -36,7 +36,7 @@ test.describe('Negative Test Cases Login', () => {
     //wait for 2 seconds
     await page.waitForTimeout(2000);
     await page.goto('http://localhost:3000/login');
-    await page.getByRole('textbox', { name: 'Username' }).fill();
+    await page.getByRole('textbox', { name: 'Username' }).fill('');
     await page.getByRole('textbox', { name: 'Password' }).fill(validPass);
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     // await for 2 seconds
@@ -49,7 +49,7 @@ test.describe('Negative Test Cases Login', () => {
     await page.waitForTimeout(2000);
     await page.goto('http://localhost:3000/login');
     await page.getByRole('textbox', { name: 'Username' }).fill(validUser);
-    await page.getByRole('textbox', { name: 'Password' }).fill();
+    await page.getByRole('textbox', { name: 'Password' }).fill('');
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     // await for 2 seconds
     await page.waitForTimeout(2000);
@@ -59,8 +59,8 @@ test.describe('Negative Test Cases Login', () => {
     //wait for 2 seconds
     await page.waitForTimeout(2000);
     await page.goto('http://localhost:3000/login');
-    await page.getByRole('textbox', { name: 'Username' }).fill();
-    await page.getByRole('textbox', { name: 'Password' }).fill();
+    await page.getByRole('textbox', { name: 'Username' }).fill('');
+    await page.getByRole('textbox', { name: 'Password' }).fill('');
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     // await for 2 seconds
     await page.waitForTimeout(2000);
@@ -84,7 +84,7 @@ test.describe('Negative Test Cases Login', () => {
     await page.waitForTimeout(2000);
     await page.goto('http://localhost:3000/login');
     await page.getByRole('textbox', { name: 'Username' }).fill(validUser);
-    await page.getByRole('textbox', { name: 'Password' }).fill(123);
+    await page.getByRole('textbox', { name: 'Password' }).fill('123');
     await page.getByRole('button', { name: 'Login', exact: true }).click();
     // await for 2 seconds
     await page.waitForTimeout(2000);
