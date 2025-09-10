@@ -1,10 +1,9 @@
 "use client";
 
-// ✅ 1. Import useState and useEffect (already present, just confirming)
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, memo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
+import { useForm, useFormContext } from "react-hook-form";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,42 +19,46 @@ import { toast } from "sonner";
 import { ArrowLeft } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Google Icon Component (unchanged)
+/* ---------------- UI: Google Icon ---------------- */
 const GoogleIcon = () => (
   <svg className="mr-3 h-5 w-5" viewBox="0 0 48 48">
     <path
       fill="#FFC107"
       d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"
-    ></path>
+    />
     <path
       fill="#FF3D00"
       d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"
-    ></path>
+    />
     <path
       fill="#4CAF50"
       d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.202,0-9.619-3.317-11.283-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"
-    ></path>
+    />
     <path
       fill="#1976D2"
       d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C42.012,35.836,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"
-    ></path>
+    />
   </svg>
 );
 
+/* ---------------- Validation Schemas ---------------- */
 const registerFormSchema = z
   .object({
-    username: z.string().min(2, {
-      message: "Username must be at least 2 characters.",
-    }),
-    email: z.string().email({
-      message: "Please enter a valid email address.",
-    }),
-    password: z.string().min(6, {
-      message: "Password must be at least 6 characters.",
-    }),
-    confirmPassword: z.string().min(6, {
-      message: "Confirm password must be at least 6 characters.",
-    }),
+    username: z
+      .string()
+      .min(6, { message: "Username must be at least 6 characters." })
+      .max(30, { message: "Username must be at most 30 characters." })
+      .regex(/^[A-Za-z0-9]+$/, {
+        message:
+          "Only English letters and numbers are allowed (no spaces/symbols).",
+      }),
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters." }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Confirm password must be at least 6 characters." }),
     terms: z.boolean().refine((val) => val === true, {
       message: "You must accept the terms and conditions.",
     }),
@@ -70,65 +73,137 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>;
 const otpFormSchema = z.object({
   otp: z
     .string()
-    .length(5, {
-      message: "OTP must be exactly 5 digits.",
-    })
-    .regex(/^\d{5}$/, {
-      message: "OTP must contain only digits.",
-    }),
+    .length(5, { message: "OTP must be exactly 5 digits." })
+    .regex(/^\d{5}$/, { message: "OTP must contain only digits." }),
 });
 
+/* ---------------- Reusable Pieces ---------------- */
+// นับถอยหลัง + ปุ่ม resend แยกออกมา เพื่อลด re-render ที่ฟอร์ม OTP
+const ResendSection = memo(function ResendSection({
+  countdown,
+  isResending,
+  onResend,
+}: {
+  countdown: number;
+  isResending: boolean;
+  onResend: () => void;
+}) {
+  return (
+    <div className="mt-4 text-center text-sm text-gray-600">
+      Didn't receive the code?{" "}
+      {countdown > 0 ? (
+        <span className="font-semibold text-gray-500">
+          Resend in {countdown}s
+        </span>
+      ) : (
+        <button
+          type="button"
+          className="h-auto p-0 font-semibold text-green-600 hover:underline disabled:text-gray-400 disabled:no-underline"
+          onClick={onResend}
+          disabled={isResending}
+        >
+          {isResending ? "Resending..." : "Resend OTP"}
+        </button>
+      )}
+    </div>
+  );
+});
+
+// ช่อง OTP แยก/เมโมไว้ เพื่อลด re-render ตอน countdown เดิน
+const OtpCodeField = memo(function OtpCodeField({
+  autoFocus = true,
+}: {
+  autoFocus?: boolean;
+}) {
+  const { control } = useFormContext();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    if (autoFocus && inputRef.current) inputRef.current.focus();
+  }, [autoFocus]);
+
+  return (
+    <FormField
+      control={control}
+      name="otp"
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel className="font-medium text-gray-700">OTP Code</FormLabel>
+          <FormControl>
+            <Input
+              ref={inputRef}
+              placeholder="Enter 5-digit code"
+              inputMode="numeric"
+              pattern="\d*"
+              autoComplete="one-time-code"
+              maxLength={5}
+              value={field.value ?? ""}
+              // กัน non-digit ทั้งหมด + บังคับความยาว 5
+              onChange={(e) => {
+                const val = e.target.value.replace(/\D/g, "").slice(0, 5);
+                field.onChange(val);
+              }}
+              // กัน spacebar และคีย์ non-digit
+              onKeyDown={(e) => {
+                if (e.key === " " || (e.key.length === 1 && /\D/.test(e.key))) {
+                  e.preventDefault();
+                }
+              }}
+              className="h-11 rounded-md border-gray-300 text-center text-base tracking-widest focus:border-green-500 focus:ring-green-500 sm:h-12"
+            />
+          </FormControl>
+          <FormMessage className="text-sm text-red-500" />
+        </FormItem>
+      )}
+    />
+  );
+});
+
+/* ---------------- Page Component ---------------- */
 export default function RegisterForm() {
   const router = useRouter();
   const [showOtpForm, setShowOtpForm] = useState(false);
   const [registrationEmail, setRegistrationEmail] = useState("");
   const [csrfToken, setCsrfToken] = useState<string | null>(null);
 
-  // ✅ 2. Add state for countdown timer, resend loading, and original registration data
+  // resend & countdown state
   const [countdown, setCountdown] = useState(0);
   const [isResending, setIsResending] = useState(false);
   const [registrationData, setRegistrationData] =
     useState<RegisterFormValues | null>(null);
 
+  // ดึง CSRF
   useEffect(() => {
-    const fetchCsrfToken = async () => {
+    (async () => {
       try {
         const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
-        const response = await fetch(`${backendURL}/api/csrf-token`, {
+        const res = await fetch(`${backendURL}/api/csrf-token`, {
           credentials: "include",
         });
-        if (response.ok) {
-          const data = await response.json();
-          setCsrfToken(data.csrfToken);
-          console.log("CSRF Token fetched successfully.");
-        } else {
-          console.error("Failed to fetch CSRF token");
+        if (!res.ok) {
           toast.error("Security Error", {
             description: "Could not initialize a secure session.",
           });
+          return;
         }
-      } catch (error) {
-        console.error("Error fetching CSRF token:", error);
+        const data = await res.json();
+        setCsrfToken(data.csrfToken);
+      } catch (err) {
         toast.error("Connection Error", {
           description: "Could not connect to the server for security setup.",
         });
       }
-    };
-    fetchCsrfToken();
+    })();
   }, []);
 
-  // ✅ 3. Add useEffect to handle the countdown timer
+  // ตัวจับเวลา (countdown)
   useEffect(() => {
     if (countdown <= 0) return;
-
-    const timer = setInterval(() => {
-      setCountdown((prevCountdown) => prevCountdown - 1);
-    }, 1000);
-
-    // Cleanup interval on component unmount or when countdown reaches 0
-    return () => clearInterval(timer);
+    const t = setInterval(() => setCountdown((c) => c - 1), 1000);
+    return () => clearInterval(t);
   }, [countdown]);
 
+  // ฟอร์มสมัคร
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -141,13 +216,15 @@ export default function RegisterForm() {
     mode: "onChange",
   });
 
+  // ฟอร์ม OTP
   const otpForm = useForm<z.infer<typeof otpFormSchema>>({
     resolver: zodResolver(otpFormSchema),
-    defaultValues: {
-      otp: "",
-    },
+    defaultValues: { otp: "" },
+    shouldUnregister: false, // กันค่าเด้งหายเวลา re-render
+    mode: "onChange",
   });
 
+  // ส่งข้อมูลสมัคร + ขอ OTP
   async function onRegisterSubmit(values: RegisterFormValues) {
     if (!csrfToken) {
       toast.error("Security Error", {
@@ -179,30 +256,27 @@ export default function RegisterForm() {
 
       if (response.ok) {
         setRegistrationEmail(values.email);
-        // ✅ 4. Store registration data for the resend function
         setRegistrationData(values);
         setShowOtpForm(true);
-        // ✅ 5. Start the countdown after successfully sending the first OTP
         setCountdown(50);
         toast.success("Registration Successful!", {
           description: "Please check your email for the OTP code.",
         });
       } else {
-        const errorData = await response.json();
-        console.error("Registration failed:", errorData);
+        const errorData = await response.json().catch(() => ({}));
         toast.error("Registration Failed", {
           description:
             errorData.message || "Something went wrong. Please try again.",
         });
       }
     } catch (error) {
-      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
+  // ยืนยัน OTP
   async function onOtpSubmit(values: z.infer<typeof otpFormSchema>) {
     if (!csrfToken) {
       toast.error("Security Error", {
@@ -211,10 +285,7 @@ export default function RegisterForm() {
       return;
     }
 
-    toast.info("Verifying OTP...", {
-      description: `Code: ${values.otp}`,
-      duration: 2000,
-    });
+    toast.info("Verifying OTP...", { duration: 1500 });
 
     try {
       const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
@@ -222,7 +293,6 @@ export default function RegisterForm() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          // Corrected header name for consistency
           "X-CSRF-Token": csrfToken,
         },
         body: JSON.stringify({
@@ -233,33 +303,25 @@ export default function RegisterForm() {
       });
 
       if (response.ok) {
-        console.log("OTP verification successful");
-
         toast.success("Account Verified!", {
-          description:
-            "Your account is verified. Redirecting to the homepage...",
+          description: "Your account is verified. Redirecting...",
         });
-
-        setTimeout(() => {
-          router.push("/");
-        }, 2000);
+        router.push("/");
       } else {
-        const errorData = await response.json();
-        console.error("OTP verification failed:", errorData);
+        const errorData = await response.json().catch(() => ({}));
         toast.error("Verification Failed", {
           description:
             errorData.message || "Invalid OTP code. Please try again.",
         });
       }
     } catch (error) {
-      console.error("Connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
     }
   }
 
-  // ✅ 6. Create the function to handle resending the OTP
+  // ส่ง OTP ใหม่
   async function handleResendOtp() {
     if (!csrfToken || !registrationData) {
       toast.error("Error", {
@@ -267,7 +329,6 @@ export default function RegisterForm() {
       });
       return;
     }
-
     setIsResending(true);
     toast.info("Resending OTP...");
 
@@ -279,7 +340,6 @@ export default function RegisterForm() {
           "Content-Type": "application/json",
           "X-CSRF-Token": csrfToken,
         },
-        // Resend the original registration data
         body: JSON.stringify({
           username: registrationData.username,
           email: registrationData.email,
@@ -292,16 +352,15 @@ export default function RegisterForm() {
         toast.success("OTP Resent!", {
           description: "A new OTP has been sent to your email.",
         });
-        setCountdown(50); // Restart the countdown
+        setCountdown(50);
       } else {
-        const errorData = await response.json();
+        const errorData = await response.json().catch(() => ({}));
         toast.error("Failed to Resend OTP", {
           description:
             errorData.message || "Something went wrong. Please try again.",
         });
       }
     } catch (error) {
-      console.error("Resend OTP connection error:", error);
       toast.error("Connection Error", {
         description: "Unable to connect to the server. Please try again.",
       });
@@ -310,20 +369,22 @@ export default function RegisterForm() {
     }
   }
 
+  // กลับไปหน้าสมัคร
   const handleBackToRegister = () => {
     setShowOtpForm(false);
     setRegistrationEmail("");
-    // ✅ 7. Reset the new states when going back
     setRegistrationData(null);
     setCountdown(0);
-    registerForm.reset();
+    otpForm.reset({ otp: "" });
   };
 
+  // Google
   const handleGoogleLogin = () => {
     const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL;
     window.location.href = `${backendURL}/auth/google`;
   };
 
+  /* ---------------- Sub UIs ---------------- */
   const OtpVerificationForm = () => (
     <div className="w-full max-w-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -332,10 +393,7 @@ export default function RegisterForm() {
           className="rounded-full p-2"
           onClick={handleBackToRegister}
         >
-          <ArrowLeft
-            size={24}
-            className="h-6 w-6 text-gray-700 sm:h-8 sm:w-8"
-          />
+          <ArrowLeft className="h-6 w-6 text-gray-700 sm:h-8 sm:w-8" />
         </Button>
         <h1 className="flex-grow pr-12 text-center text-3xl font-bold text-gray-900 sm:text-4xl">
           Verify OTP
@@ -353,25 +411,7 @@ export default function RegisterForm() {
           onSubmit={otpForm.handleSubmit(onOtpSubmit)}
           className="space-y-4"
         >
-          <FormField
-            control={otpForm.control}
-            name="otp"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="font-medium text-gray-700">
-                  OTP Code
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Enter 5-digit code"
-                    {...field}
-                    className="h-11 rounded-md border-gray-300 text-center text-base tracking-widest focus:border-green-500 focus:ring-green-500 sm:h-12"
-                  />
-                </FormControl>
-                <FormMessage className="text-sm text-red-500" />
-              </FormItem>
-            )}
-          />
+          <OtpCodeField autoFocus />
           <Button
             type="submit"
             className="h-12 w-full rounded-md bg-green-500 text-lg font-semibold text-white shadow-md transition-colors duration-200 hover:bg-green-600 sm:h-14"
@@ -381,29 +421,14 @@ export default function RegisterForm() {
         </form>
       </Form>
 
-      {/* ✅ 8. Add UI for the resend button and countdown timer */}
-      <div className="mt-4 text-center text-sm text-gray-600">
-        Didn't receive the code?{" "}
-        {countdown > 0 ? (
-          <span className="font-semibold text-gray-500">
-            Resend in {countdown}s
-          </span>
-        ) : (
-          <Button
-            type="button"
-            variant="link"
-            className="h-auto p-0 font-semibold text-green-600 hover:underline disabled:text-gray-400 disabled:no-underline"
-            onClick={handleResendOtp}
-            disabled={isResending}
-          >
-            {isResending ? "Resending..." : "Resend OTP"}
-          </Button>
-        )}
-      </div>
+      <ResendSection
+        countdown={countdown}
+        isResending={isResending}
+        onResend={handleResendOtp}
+      />
     </div>
   );
 
-  // The RegisterMainForm component remains unchanged
   const RegisterMainForm = () => (
     <div className="flex min-h-screen flex-col bg-white p-10 md:p-10">
       <div className="flex flex-grow items-start justify-center">
@@ -432,12 +457,27 @@ export default function RegisterForm() {
                         placeholder="Choose a username"
                         {...field}
                         className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                        // กัน spacebar
+                        onKeyDown={(e) => {
+                          if (e.key === " ") e.preventDefault();
+                        }}
+                        // กรองเฉพาะ A-Z a-z 0-9
+                        onChange={(e) => {
+                          const sanitized = e.target.value.replace(
+                            /[^A-Za-z0-9]/g,
+                            "",
+                          );
+                          field.onChange(sanitized);
+                        }}
+                        inputMode="text"
+                        autoComplete="username"
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={registerForm.control}
                 name="email"
@@ -452,12 +492,14 @@ export default function RegisterForm() {
                         placeholder="Enter your email"
                         {...field}
                         className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                        autoComplete="email"
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={registerForm.control}
                 name="password"
@@ -472,12 +514,14 @@ export default function RegisterForm() {
                         placeholder="Create a password"
                         {...field}
                         className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                        autoComplete="new-password"
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={registerForm.control}
                 name="confirmPassword"
@@ -492,6 +536,7 @@ export default function RegisterForm() {
                         placeholder="Confirm your password"
                         {...field}
                         className="h-11 rounded-md border-gray-300 text-base focus:border-green-500 focus:ring-green-500 sm:h-12"
+                        autoComplete="new-password"
                       />
                     </FormControl>
                     <FormMessage className="text-sm text-red-500" />
@@ -512,14 +557,14 @@ export default function RegisterForm() {
                     </FormControl>
                     <div className="space-y-1 leading-none">
                       <FormLabel className="text-sm font-normal whitespace-nowrap text-green-500">
-                        I agree to the {""}
+                        I agree to the{" "}
                         <a
                           href="/terms"
                           className="underline hover:text-green-600"
                         >
                           Terms of Service
-                        </a>
-                        and
+                        </a>{" "}
+                        and{" "}
                         <a
                           href="/privacy"
                           className="underline hover:text-green-600"
@@ -575,6 +620,7 @@ export default function RegisterForm() {
     </div>
   );
 
+  /* ---------------- Render ---------------- */
   return (
     <div className="flex min-h-screen flex-col bg-white p-4 sm:p-6 md:p-10">
       <div className="flex flex-grow items-center justify-center">
