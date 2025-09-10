@@ -1,4 +1,3 @@
-import Image from "next/image";
 import {
   Card,
   CardContent,
@@ -6,17 +5,9 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
+import { RestaurantProps } from "@/types";
 
-export interface RestaurantProps {
-  id: number;
-  name: string;
-  image: string;
-  description?: string;
-  avgRating: number;
-  totalReviews: number;
-  categories: string[];
-  images: string[];
-}
+import Image from "next/image";
 
 const PrimaryRestaurantCard = ({
   restaurant,

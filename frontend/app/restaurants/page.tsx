@@ -1,7 +1,5 @@
 import FilterRestaurant from "@/components/restaurants/FilterRestaurant";
-import PrimaryRestaurantCard, {
-  RestaurantProps,
-} from "@/components/restaurants/PrimaryRestaurantCard.tsx";
+import PrimaryRestaurantCard from "@/components/restaurants/PrimaryRestaurantCard.tsx";
 import RecommendFilterButton from "@/components/restaurants/RecommendFilterButton";
 import SecondaryRestaurantCard from "@/components/restaurants/SecondaryRestaurantCard";
 import Link from "next/link";
@@ -9,15 +7,17 @@ import restaurantData from "@/mockdata/restaurant.json";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { RestaurantProps } from "@/types";
 
 const getRestaurants = async (
+  search: string,
   categories: string,
   ratings: string,
   prices: string,
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?category=${categories || ""}&rating=${ratings || ""}&priceRate=${prices || ""}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?search=${search || ""}&category=${categories || ""}&rating=${ratings || ""}&price=${prices || ""}`,
     );
     if (!res.ok) {
       return { restaurant: [] };
@@ -36,18 +36,18 @@ const RestaurantsPage = async ({
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) => {
   const searchParamsData = await searchParams;
-  const { categories, ratings, prices } = searchParamsData;
+  const { categories, ratings, prices, search } = searchParamsData as {
+    categories: string;
+    ratings: string;
+    prices: string;
+    search: string;
+  };
   const { restaurant } = await getRestaurants(
-    categories as string,
-    ratings as string,
-    prices as string,
+    search,
+    categories,
+    ratings,
+    prices,
   );
-
-  console.log(restaurant);
-
-  // const restaurantSlice = restaurant
-
-  // console.log(restaurantSlice);
 
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
@@ -56,14 +56,15 @@ const RestaurantsPage = async ({
         <FilterRestaurant />
       </div>
 
-      <div className="flex flex-1 flex-col gap-4">
+      <div className="flex flex-col flex-1 gap-4">
         {/* Recommended Restaurants */}
         <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex gap-2">
-                <RecommendFilterButton filter="popular" />
-                <RecommendFilterButton filter="new" />
+                {/* <RecommendFilterButton filter="popular" />
+                <RecommendFilterButton filter="new" /> */}
+                ร้านยอดนิยม
               </CardTitle>
             </CardHeader>
             <Separator />
@@ -113,10 +114,7 @@ const RestaurantsPage = async ({
             </CardHeader>
             <Separator />
             <CardContent className="grid gap-4">
-              {/* <PrimaryRestaurantCard restaurant={restaurantData[0]} />
-              <PrimaryRestaurantCard restaurant={restaurantData[1]} />
-              <PrimaryRestaurantCard restaurant={restaurantData[2]} /> */}
-              {restaurant.map((restaurant: RestaurantProps) => (
+              {restaurantData.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.id}`}
                   key={restaurant.id}
