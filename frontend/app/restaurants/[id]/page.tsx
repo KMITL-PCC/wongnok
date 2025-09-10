@@ -11,6 +11,7 @@ import { BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import RestaurantImagesCarousel from "@/components/restaurant-detail/RestaurantImagesCarousel";
 import { RestaurantInfoProps } from "@/types";
+import GoBackButton from "@/components/GoBackButton";
 
 const restaurantInfo: RestaurantInfoProps = {
   name: "Dib lamun cafe",
@@ -68,7 +69,7 @@ const RestaurantDetailPage = async ({
   // console.log(restaurant);
 
   return (
-    <div className="flex flex-col gap-4 pt-4">
+    <div className="relative flex flex-col gap-4 pt-8">
       {/* <div className="grid grid-cols-2 gap-2 px-4">
         <div className="relative border border-border h-80 rounded-xl md:h-96">
           <Image
@@ -89,6 +90,9 @@ const RestaurantDetailPage = async ({
           />
         </div>
       </div> */}
+
+      <GoBackButton className="absolute left-0 z-50 top-1" />
+
       <RestaurantImagesCarousel restaurantInfo={restaurantInfo} />
 
       <div className="grid grid-cols-2 grid-rows-2 gap-2 px-4 md:px-8">
@@ -124,14 +128,14 @@ const RestaurantDetailPage = async ({
 
         {restaurantInfo.address && (
           <Card className="flex items-center justify-center col-span-2 md:col-span-1">
-            <CardContent className="flex flex-col items-center gap-4 md:flex-row">
+            <CardContent className="flex flex-row items-center gap-4 lg:gap-10 xl:gap-20">
               <a
                 href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.longitude}`}
                 target="_blank"
               >
-                <div className="relative mx-auto border border-border h-30 w-30 rounded-xl">
+                <div className="relative mx-auto h-30 w-30 rounded-xl xl:h-40 xl:w-40">
                   <Image
-                    src="/google-map.webp"
+                    src="/map-pic.jpg"
                     alt="map"
                     fill
                     className="object-cover rounded-xl"
