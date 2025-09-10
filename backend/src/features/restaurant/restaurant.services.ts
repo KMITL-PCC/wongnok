@@ -49,6 +49,7 @@ export default {
       }));
     }
 
+    console.log(JSON.stringify(whereClause, null, 2));
     //3. sort field
     const orderBy: any = {};
     const sortField = sortBy || "avgRating";
@@ -131,6 +132,7 @@ export default {
       };
     });
 
+    console.log(restaurant);
     return {
       restaurant: restaurant,
       totalPages: Math.ceil(total / limit),
@@ -316,7 +318,7 @@ export default {
       description: information.description,
       address: information.address,
       latitude: information.latitude,
-      logitude: information.longitude,
+      longitude: information.longitude,
       status: information.status,
       minPrice: information.minPrice,
       maxPrice: information.maxPrice,
