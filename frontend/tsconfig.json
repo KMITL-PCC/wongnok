@@ -13,7 +13,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
-    "types": ["google.maps", "node", "react"],
+    "types": ["node", "react"],
     "plugins": [
       {
         "name": "next"

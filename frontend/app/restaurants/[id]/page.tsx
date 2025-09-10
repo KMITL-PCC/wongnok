@@ -12,7 +12,7 @@ import Image from "next/image";
 import RestaurantImagesCarousel from "@/components/restaurant-detail/RestaurantImagesCarousel";
 import { RestaurantInfoProps } from "@/types";
 
-const restaurantInfo: RestaurantInfoProps = {
+const restaurantInwza: RestaurantInfoProps = {
   name: "Dib lamun cafe",
   description: "คาเฟ่อร่อยโดนใจ กลางคืนมีเครื่องดื่ม บรรยากาศดี",
   address: "เลขที่ 13 ตำบล ชุมโค อำเภอปะทิว ชุมพร 86160",
@@ -62,7 +62,7 @@ const RestaurantDetailPage = async ({
 }) => {
   const { id } = await params;
 
-  // const { restaurantInfo } = await getRestaurantById(id);
+  const { restaurantInfo } = await getRestaurantById(id);
   // const restaurant = restaurantInfo;
 
   // console.log(restaurant);
@@ -123,22 +123,22 @@ const RestaurantDetailPage = async ({
         </Card>
 
         {restaurantInfo.address && (
-          <Card className="flex items-center justify-center col-span-2 md:col-span-1">
+          <Card className="col-span-2 flex items-center justify-center md:col-span-1">
             <CardContent className="flex flex-col items-center gap-4 md:flex-row">
               <a
                 href={`https://www.google.com/maps?q=${restaurantInfo.latitude},${restaurantInfo.longitude}`}
                 target="_blank"
               >
-                <div className="relative mx-auto border border-border h-30 w-30 rounded-xl">
+                <div className="border-border relative mx-auto h-30 w-30 rounded-xl border">
                   <Image
                     src="/google-map.webp"
                     alt="map"
                     fill
-                    className="object-cover rounded-xl"
+                    className="rounded-xl object-cover"
                   />
                 </div>
               </a>
-              <div className="flex flex-col w-full gap-2">
+              <div className="flex w-full flex-col gap-2">
                 <p>{restaurantInfo.address}</p>
                 <Separator />
                 <p>{restaurantInfo.contact.contactDetail}</p>
