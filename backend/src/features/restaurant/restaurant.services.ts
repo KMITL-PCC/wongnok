@@ -143,7 +143,8 @@ export default {
     information: Restaurant.information,
     price: Restaurant.price,
     time: any,
-    pictures: Express.Multer.File[]
+    pictures: Express.Multer.File[],
+    services: any
   ) => {
     //0. map open hour
     const availableTime: Restaurant.time[] = [];
@@ -211,8 +212,8 @@ export default {
             maxPrice: price.maxPrice,
             contact: {
               create: {
-                contactType: "Number",
-                contactDetail: "0807195642",
+                contactType: "phone",
+                contactDetail: "0868225445",
               },
             },
           },

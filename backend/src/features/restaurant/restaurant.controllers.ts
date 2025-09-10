@@ -24,11 +24,11 @@ export default {
     // },
     // time : {
     //       "weekday",
-    //       "opentime",
-    //       "closetime"
+    //       "openTime",
+    //       "closeTime"
     // }
     // }
-    const { information, price, time } = JSON.parse(req.body.info);
+    const { information, price, time, services } = JSON.parse(req.body.info);
     const pictures = req.files as Express.Multer.File[];
 
     const missingInfo = validateNestedFields(information, [
@@ -54,7 +54,8 @@ export default {
         information,
         price,
         time,
-        pictures
+        pictures,
+        services
       );
 
       if (!result) {

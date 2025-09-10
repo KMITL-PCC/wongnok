@@ -11,7 +11,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data # เก็บข้อมูล DB แบบถาวร
+      - postgres_v1:/var/lib/postgresql/data # เก็บข้อมูล DB แบบถาวร
     networks:
       - app_network
     healthcheck:
@@ -59,3 +59,4 @@ volumes:
   postgres_data: # Volume สำหรับข้อมูล PostgreSQL
   pgadmin_data: # Volume สำหรับ Configuration ของ PgAdmin
   redis_data:
+  postgres_v1:
