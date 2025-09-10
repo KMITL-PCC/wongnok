@@ -21,10 +21,10 @@ const filters: FilterProps = {
     { id: "ร้านอาหารตามสั่ง", name: "ร้านอาหารตามสั่ง" },
     { id: "ร้านก๋วยเตี๋ยว", name: "ร้านก๋วยเตี๋ยว" },
     { id: "คาเฟ่", name: "คาเฟ่" },
-    { id: "รา้นเครื่องดื่ม", name: "ร้านเครื่องดื่ม" },
+    { id: "ร้านเครื่องดื่ม", name: "ร้านเครื่องดื่ม" },
     { id: "ร้านอาหารอีสาน", name: "ร้านอาหารอีสาน" },
-    { id: "ของหวาน", name: "ของหวาน" },
-    { id: "ของกินเล่น", name: "ของกินเล่น" },
+    { id: "ร้านของหวาน", name: "ร้านของหวาน" },
+    { id: "ร้านของกินเล่น", name: "ร้านของกินเล่น" },
     { id: "อาหารฮาลาล", name: "อาหารฮาลาล" },
   ],
 
@@ -122,7 +122,7 @@ const FilterRestaurant = () => {
         <CardContent className="flex flex-col gap-4 px-0">
           {/* Category */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Category</h1>
+            <h1 className="text-md font-semibold">Category</h1>
 
             {categoriesData.map((category) => (
               <div className="flex items-center gap-2" key={category.id}>
@@ -140,7 +140,7 @@ const FilterRestaurant = () => {
 
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Rating</h1>
+            <h1 className="text-md font-semibold">Rating</h1>
 
             {ratingsData.map((rating) => (
               <div className="flex items-center gap-2" key={rating.id}>
@@ -158,7 +158,7 @@ const FilterRestaurant = () => {
 
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Price</h1>
+            <h1 className="text-md font-semibold">Price</h1>
             {pricesData.map((price) => (
               <div className="flex items-center gap-2" key={price.id}>
                 <Checkbox
@@ -183,7 +183,7 @@ const FilterRestaurant = () => {
         <SheetContent side="top" className="py-6">
           {/* Category */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Category</h1>
+            <h1 className="text-md font-semibold">Category</h1>
             {categoriesData.map((category) => (
               <div className="flex items-center gap-2" key={category.id}>
                 <Checkbox
@@ -200,7 +200,7 @@ const FilterRestaurant = () => {
 
           {/* Rating */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Rating</h1>
+            <h1 className="text-md font-semibold">Rating</h1>
             {ratingsData.map((rating) => (
               <div className="flex items-center gap-2" key={rating.id}>
                 <Checkbox
@@ -217,7 +217,7 @@ const FilterRestaurant = () => {
 
           {/* Price */}
           <div className="flex flex-col gap-3 px-3">
-            <h1 className="font-semibold text-md">Price</h1>
+            <h1 className="text-md font-semibold">Price</h1>
             {pricesData.map((price) => (
               <div className="flex items-center gap-2" key={price.id}>
                 <Checkbox

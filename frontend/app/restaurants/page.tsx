@@ -17,7 +17,7 @@ const getRestaurants = async (
 ) => {
   try {
     const res = await fetch(
-      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?search=${search || ""}&category=${categories || ""}&rating=${ratings || ""}&price=${prices || ""}`,
+      `${process.env.NEXT_PUBLIC_BACKEND_URL}/restaurant/get?search=${search || ""}&category=${categories || ""}&rating=${ratings || ""}&priceRate=${prices || ""}`,
     );
     if (!res.ok) {
       return { restaurant: [] };
@@ -49,6 +49,8 @@ const RestaurantsPage = async ({
     prices,
   );
 
+  console.log(restaurant);
+
   return (
     <div className="flex flex-col gap-4 p-4 md:flex-row md:p-8">
       {/* Filter */}
@@ -56,20 +58,20 @@ const RestaurantsPage = async ({
         <FilterRestaurant />
       </div>
 
-      <div className="flex flex-col flex-1 gap-4">
+      <div className="flex flex-1 flex-col gap-4">
         {/* Recommended Restaurants */}
-        <div>
+        {/* <div>
           <Card>
             <CardHeader>
               <CardTitle className="flex gap-2">
-                {/* <RecommendFilterButton filter="popular" />
-                <RecommendFilterButton filter="new" /> */}
+                <RecommendFilterButton filter="popular" />
+                <RecommendFilterButton filter="new" />
                 ร้านยอดนิยม
               </CardTitle>
             </CardHeader>
             <Separator />
             <CardContent className="grid grid-cols-3 gap-4">
-              {/* <Link href="/restaurants/1">
+              <Link href="/restaurants/1">
                 <SecondaryRestaurantCard />
               </Link>
               <Link href="/restaurants/2">
@@ -80,7 +82,7 @@ const RestaurantsPage = async ({
               </Link>
               <Link href="/restaurants/4">
                 <SecondaryRestaurantCard className="hidden lg:flex" />
-              </Link> */}
+              </Link>
               {restaurantData.slice(0, 3).map((restaurant) => (
                 <Link
                   href={`/restaurants/${restaurant.id}`}
@@ -91,7 +93,7 @@ const RestaurantsPage = async ({
               ))}
             </CardContent>
           </Card>
-        </div>
+        </div> */}
 
         {/* Map */}
         {/* <div>
@@ -114,7 +116,7 @@ const RestaurantsPage = async ({
             </CardHeader>
             <Separator />
             <CardContent className="grid gap-4">
-              {restaurantData.map((restaurant: RestaurantProps) => (
+              {restaurant.map((restaurant: RestaurantProps) => (
                 <Link
                   href={`/restaurants/${restaurant.id}`}
                   key={restaurant.id}
